@@ -81,12 +81,12 @@ extension NSObject: Backgroundable
 extension UIViewController: AppStatesHandler, Visibility
 {
     //MARK: Becoming
-    func becomeBackgroundable()
+    public final func becomeBackgroundable()
     {
         makeAppStatesHandler(self)
     }
     
-    func resignBackgroundable()
+    public final func resignBackgroundable()
     {
         unmakeAppStatesHandler(self)
     }
@@ -199,7 +199,7 @@ public class Queuer
     }
     
     //MARK: Enqueueing
-    static func enqueue(operation: NSOperation)
+    public static func enqueue(operation: NSOperation)
     {
         self.willStartOperation()
         
@@ -220,12 +220,12 @@ public class Queuer
         self.concurrentQueue!.addOperation(operation)
     }
     
-    static func enqueue(closure: VoidClosure)
+    internal static func enqueue(closure: VoidClosure)
     {
         self.enqueue(NSBlockOperation(block: closure))
     }
     
-    static func enqueue(operations: [NSOperation])
+    public static func enqueue(operations: [NSOperation])
     {
         if operations.count == 0 {
             return
@@ -252,7 +252,7 @@ public class Queuer
 
 //MARK: Auxiliary global functions
 
-public func startBgTask(object: Backgroundable)
+private func startBgTask(object: Backgroundable)
 {
     if object.bgTaskId != UIBackgroundTaskInvalid {
         endBgTask(object)
@@ -272,7 +272,7 @@ public func startBgTask() -> UIBackgroundTaskIdentifier
     return result
 }
 
-public func endBgTask(object: Backgroundable)
+private func endBgTask(object: Backgroundable)
 {
     endBgTask(object.bgTaskId)
     object.bgTaskId = UIBackgroundTaskInvalid
