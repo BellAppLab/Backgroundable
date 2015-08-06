@@ -1,0 +1,6 @@
+framework module Backgroundable {
+  umbrella header "Backgroundable-umbrella.h"
+
+  export *
+  module * { export * }
+}

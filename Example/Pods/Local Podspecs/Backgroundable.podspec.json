@@ -1,0 +1,25 @@
+{
+  "name": "Backgroundable",
+  "version": "0.1.0",
+  "summary": "A short description of Backgroundable.",
+  "description": "An optional longer description of Backgroundable\n\n* Markdown format.\n* Don't worry about the indent, we strip it!",
+  "homepage": "https://github.com/<GITHUB_USERNAME>/Backgroundable",
+  "license": "MIT",
+  "authors": {
+    "Bell App Lab": "apps@bellapplab.com"
+  },
+  "source": {
+    "git": "https://github.com/<GITHUB_USERNAME>/Backgroundable.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "8.0"
+  },
+  "requires_arc": true,
+  "source_files": "Pod/Classes/**/*",
+  "resource_bundles": {
+    "Backgroundable": [
+      "Pod/Assets/*.png"
+    ]
+  }
+}
