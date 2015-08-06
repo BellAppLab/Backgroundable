@@ -157,7 +157,6 @@
 		5A8686B08CEE4DE8B993EA5560C90330 /* EndWith.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = EndWith.swift; path = Nimble/Matchers/EndWith.swift; sourceTree = "<group>"; };
 		5C70B7278D7E35B4B2444C7D132E7FD0 /* Pods-Backgroundable_Tests-umbrella.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Pods-Backgroundable_Tests-umbrella.h"; sourceTree = "<group>"; };
 		636D7FEE66CBFBE7CE3B0A83064B03EC /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		651CB8BB1B7357930086042D /* Backgroundable-Backgroundable-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Backgroundable-Backgroundable-Bridging-Header.h"; sourceTree = "<group>"; };
 		651CB8BC1B7357940086042D /* Backgroundable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Backgroundable.swift; sourceTree = "<group>"; };
 		65CC0E5C546AD518624BE6D5B66419ED /* AssertionRecorder.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = AssertionRecorder.swift; path = Nimble/Adapters/AssertionRecorder.swift; sourceTree = "<group>"; };
 		696C4046AAEF7B9BA34EF7768DD6CFBA /* Quick.modulemap */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = "sourcecode.module-map"; path = Quick.modulemap; sourceTree = "<group>"; };
@@ -277,7 +276,6 @@
 			isa = PBXGroup;
 			children = (
 				651CB8BC1B7357940086042D /* Backgroundable.swift */,
-				651CB8BB1B7357930086042D /* Backgroundable-Backgroundable-Bridging-Header.h */,
 			);
 			path = Classes;
 			sourceTree = "<group>";

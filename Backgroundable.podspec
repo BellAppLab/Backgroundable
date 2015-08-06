@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "Backgroundable"
-  s.version          = "0.1.0"
+  s.version          = "0.1.1"
   s.summary          = "A collection of handy classes, extensions and global functions to handle being in the background on iOS using Swift."
   s.homepage         = "https://github.com/BellAppLab/Backgroundable"
   s.license          = 'MIT'
@@ -13,6 +13,5 @@ Pod::Spec.new do |s|
 
   s.source_files = 'Pod/Classes/**/*'
 
-  s.public_header_files = 'Pod/Classes/**/*.h'
   s.frameworks = 'UIKit'
 end
