@@ -31,7 +31,7 @@ import UIKit
 
 //MARK: - Visibility
 
-@objc protocol Visibility: NSObjectProtocol
+@objc public protocol Visibility: NSObjectProtocol
 {
     var visible: Bool { get set }
     func willChangeVisibility()
@@ -119,11 +119,12 @@ extension UIViewController: AppStatesHandler, Visibility
         }
     }
     
-    func willChangeVisibility()
+    public func willChangeVisibility()
     {
         
     }
     
+    public
     func didChangeVisibility()
     {
         
@@ -133,9 +134,9 @@ extension UIViewController: AppStatesHandler, Visibility
 
 //MARK: - Backgroundable View Controller
 
-class BackgroundableViewController: UIViewController
+public class BackgroundableViewController: UIViewController
 {
-    override func viewWillAppear(animated: Bool)
+    override public func viewWillAppear(animated: Bool)
     {
         super.viewWillAppear(animated)
         
@@ -144,14 +145,14 @@ class BackgroundableViewController: UIViewController
         self.becomeBackgroundable()
     }
     
-    override func viewDidAppear(animated: Bool)
+    override public func viewDidAppear(animated: Bool)
     {
         super.viewDidAppear(animated)
         
         self.didChangeVisibility()
     }
     
-    override func viewWillDisappear(animated: Bool)
+    override public func viewWillDisappear(animated: Bool)
     {
         super.resignBackgroundable()
         self.willChangeVisibility()
@@ -160,7 +161,7 @@ class BackgroundableViewController: UIViewController
         super.viewWillDisappear(animated)
     }
     
-    override func viewDidDisappear(animated: Bool)
+    override public func viewDidDisappear(animated: Bool)
     {
         self.didChangeVisibility()
         
@@ -173,7 +174,7 @@ class BackgroundableViewController: UIViewController
 
 public typealias VoidClosure = ()->()
 
-class Queuer
+public class Queuer
 {
     //MARK: Singletons
     private static var concurrentQueue: NSOperationQueue?

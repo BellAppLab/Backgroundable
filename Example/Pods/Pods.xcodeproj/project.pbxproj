@@ -921,7 +921,6 @@
 				PRODUCT_NAME = Backgroundable;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "../../Pod/Classes/Backgroundable-Backgroundable-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				WRAPPER_EXTENSION = bundle;
 			};
@@ -1034,7 +1033,6 @@
 				PRODUCT_NAME = Backgroundable;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "../../Pod/Classes/Backgroundable-Backgroundable-Bridging-Header.h";
 				WRAPPER_EXTENSION = bundle;
 			};
 			name = Release;
