@@ -252,7 +252,7 @@ public class Queuer
 
 //MARK: Auxiliary global functions
 
-private func startBgTask(object: Backgroundable)
+public func startBgTask(object: Backgroundable)
 {
     if object.bgTaskId != UIBackgroundTaskInvalid {
         endBgTask(object)
@@ -272,7 +272,7 @@ public func startBgTask() -> UIBackgroundTaskIdentifier
     return result
 }
 
-private func endBgTask(object: Backgroundable)
+public func endBgTask(object: Backgroundable)
 {
     endBgTask(object.bgTaskId)
     object.bgTaskId = UIBackgroundTaskInvalid
