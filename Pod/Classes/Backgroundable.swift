@@ -11,7 +11,7 @@ import UIKit
 
 //MARK: - Background task IDs
 
-@objc public protocol Backgroundable: NSObjectProtocol
+@objc public protocol Backgroundable
 {
     var bgTaskId: UIBackgroundTaskIdentifier { get set }
     
@@ -22,7 +22,7 @@ import UIKit
 
 //MARK: - Handling App States
 
-@objc public protocol AppStatesHandler: NSObjectProtocol
+@objc public protocol AppStatesHandler
 {
     func handleAppState(notification: NSNotification)
     optional func handleAppStateChange(toBackground: Bool)
@@ -31,7 +31,7 @@ import UIKit
 
 //MARK: - Visibility
 
-@objc public protocol Visibility: NSObjectProtocol
+@objc public protocol Visibility
 {
     var visible: Bool { get set }
     func willChangeVisibility()
