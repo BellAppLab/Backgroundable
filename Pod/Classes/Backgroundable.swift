@@ -45,7 +45,7 @@ extension NSObject: Backgroundable
 {
     public var bgTaskId: UIBackgroundTaskIdentifier {
         get {
-            if var int = objc_getAssociatedObject(self, "bgTaskId") as? Int {
+            if let int = objc_getAssociatedObject(self, "bgTaskId") as? Int {
                 return int
             }
             return UIBackgroundTaskInvalid
@@ -53,7 +53,7 @@ extension NSObject: Backgroundable
         set {
             //KVO
             self.willChangeValueForKey("bgTaskId")
-            objc_setAssociatedObject(self, "bgTaskId", newValue as Int, UInt(OBJC_ASSOCIATION_RETAIN) as objc_AssociationPolicy)
+            objc_setAssociatedObject(self, "bgTaskId", newValue as Int, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
             //KVO
             self.didChangeValueForKey("bgTaskId")
         }
@@ -95,7 +95,7 @@ extension UIViewController: AppStatesHandler, Visibility
     public func handleAppState(notification: NSNotification)
     {
         let result = appStateNotificationResult(notification)
-        handleAppStateNotification(result, self)
+        handleAppStateNotification(result, object: self)
         self.willChangeVisibility()
         self.visible = !result
         self.didChangeVisibility()
@@ -109,13 +109,13 @@ extension UIViewController: AppStatesHandler, Visibility
     //MARK: Visibility
     public var visible: Bool {
         get {
-            if var int = objc_getAssociatedObject(self, "visible") as? Bool {
+            if let int = objc_getAssociatedObject(self, "visible") as? Bool {
                 return int
             }
             return false
         }
         set {
-            objc_setAssociatedObject(self, "visible", newValue as Bool, UInt(OBJC_ASSOCIATION_RETAIN) as objc_AssociationPolicy)
+            objc_setAssociatedObject(self, "visible", newValue as Bool, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
         }
     }
     
@@ -206,9 +206,9 @@ public class Queuer
         let queuer = self.concurrentQueue!
         startBgTask(queuer)
         
-        var completionBlock = operation.completionBlock
+        let completionBlock = operation.completionBlock
         operation.completionBlock = { () -> Void in
-            if var block = completionBlock {
+            if let block = completionBlock {
                 dispatch_async(dispatch_get_main_queue(), { () -> Void in
                     block()
                 })
@@ -241,7 +241,7 @@ public class Queuer
             return
         }
         
-        var first = operations.firstObject as! NSOperation
+        let first = operations.firstObject as! NSOperation
         operations.removeObjectAtIndex(0)
         (operations.objectAtIndex(0) as! NSOperation).addDependency(first)
         
