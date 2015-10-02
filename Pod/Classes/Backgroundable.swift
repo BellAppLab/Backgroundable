@@ -13,10 +13,8 @@ import UIKit
 
 @objc public protocol Backgroundable
 {
-    var bgTaskId: UIBackgroundTaskIdentifier { get set }
-    
-    func startBackgroundTask()
-    func endBackgroundTask()
+    static func startBackgroundTask() -> UIBackgroundTaskIdentifier
+    static func endBackgroundTask(backgroundTaskId: UIBackgroundTaskIdentifier)
 }
 
 
@@ -43,30 +41,6 @@ import UIKit
 
 extension NSObject: Backgroundable
 {
-    public var bgTaskId: UIBackgroundTaskIdentifier {
-        get {
-            if let int = objc_getAssociatedObject(self, "bgTaskId") as? Int {
-                return int
-            }
-            return UIBackgroundTaskInvalid
-        }
-        set {
-            //KVO
-            self.willChangeValueForKey("bgTaskId")
-            objc_setAssociatedObject(self, "bgTaskId", newValue as Int, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
-            //KVO
-            self.didChangeValueForKey("bgTaskId")
-        }
-    }
-    
-    public func startBackgroundTask() {
-        startBgTask(self)
-    }
-    
-    public func endBackgroundTask() {
-        endBgTask(self)
-    }
-    
     public static func startBackgroundTask() -> UIBackgroundTaskIdentifier
     {
         return startBgTask()
@@ -78,8 +52,13 @@ extension NSObject: Backgroundable
     }
 }
 
-extension UIViewController: AppStatesHandler, Visibility
+
+//MARK: - Backgroundable View Controller
+
+public class BackgroundableViewController: UIViewController, AppStatesHandler, Visibility
 {
+    public var visible = false
+    
     //MARK: Becoming
     public final func becomeBackgroundable()
     {
@@ -106,36 +85,15 @@ extension UIViewController: AppStatesHandler, Visibility
         
     }
     
-    //MARK: Visibility
-    public var visible: Bool {
-        get {
-            if let int = objc_getAssociatedObject(self, "visible") as? Bool {
-                return int
-            }
-            return false
-        }
-        set {
-            objc_setAssociatedObject(self, "visible", newValue as Bool, objc_AssociationPolicy.OBJC_ASSOCIATION_RETAIN)
-        }
-    }
-    
-    public func willChangeVisibility()
-    {
+    public func willChangeVisibility() {
         
     }
     
-    public
-    func didChangeVisibility()
-    {
+    public func didChangeVisibility() {
         
     }
-}
-
-
-//MARK: - Backgroundable View Controller
-
-public class BackgroundableViewController: UIViewController
-{
+    
+    //MARK: View Controller Life Cycle
     override public func viewWillAppear(animated: Bool)
     {
         super.viewWillAppear(animated)
@@ -154,7 +112,7 @@ public class BackgroundableViewController: UIViewController
     
     override public func viewWillDisappear(animated: Bool)
     {
-        super.resignBackgroundable()
+        self.resignBackgroundable()
         self.willChangeVisibility()
         self.visible = false
         
@@ -203,8 +161,7 @@ public class Queuer
     {
         self.willStartOperation()
         
-        let queuer = self.concurrentQueue!
-        startBgTask(queuer)
+        let bgTaskId = startBgTask()
         
         let completionBlock = operation.completionBlock
         operation.completionBlock = { () -> Void in
@@ -214,7 +171,7 @@ public class Queuer
                 })
             }
             self.didEndOperation()
-            endBgTask(queuer)
+            endBgTask(bgTaskId)
         }
         
         self.concurrentQueue!.addOperation(operation)
@@ -252,17 +209,6 @@ public class Queuer
 
 //MARK: Auxiliary global functions
 
-public func startBgTask(object: Backgroundable)
-{
-    if object.bgTaskId != UIBackgroundTaskInvalid {
-        endBgTask(object)
-    }
-    
-    object.bgTaskId = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler{ () -> Void in
-        endBgTask(object)
-    }
-}
-
 public func startBgTask() -> UIBackgroundTaskIdentifier
 {
     var result = UIBackgroundTaskInvalid
@@ -270,12 +216,6 @@ public func startBgTask() -> UIBackgroundTaskIdentifier
         endBgTask(result)
     }
     return result
-}
-
-public func endBgTask(object: Backgroundable)
-{
-    endBgTask(object.bgTaskId)
-    object.bgTaskId = UIBackgroundTaskInvalid
 }
 
 public func endBgTask(bgTaskId: UIBackgroundTaskIdentifier)
