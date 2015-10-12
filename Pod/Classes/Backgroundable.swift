@@ -227,14 +227,14 @@ public func endBgTask(bgTaskId: UIBackgroundTaskIdentifier)
     UIApplication.sharedApplication().endBackgroundTask(bgTaskId)
 }
 
-internal func makeAppStatesHandler(object: AppStatesHandler)
+public func makeAppStatesHandler(object: AppStatesHandler)
 {
     let notificationCenter = NSNotificationCenter.defaultCenter()
     notificationCenter.addObserver(object, selector: "handleAppState:", name: UIApplicationWillResignActiveNotification, object: UIApplication.sharedApplication())
     notificationCenter.addObserver(object, selector: "handleAppState:", name: UIApplicationWillEnterForegroundNotification, object: UIApplication.sharedApplication())
 }
 
-internal func unmakeAppStatesHandler(object: AppStatesHandler)
+public func unmakeAppStatesHandler(object: AppStatesHandler)
 {
     let notificationCenter = NSNotificationCenter.defaultCenter()
     notificationCenter.removeObserver(object, name: UIApplicationWillResignActiveNotification, object: UIApplication.sharedApplication())
