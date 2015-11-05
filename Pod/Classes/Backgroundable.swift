@@ -53,81 +53,6 @@ extension NSObject: Backgroundable
 }
 
 
-//MARK: - Backgroundable View Controller
-
-public class BackgroundableViewController: UIViewController, AppStatesHandler, Visibility
-{
-    public var visible = false
-    
-    //MARK: Becoming
-    public final func becomeBackgroundable()
-    {
-        makeAppStatesHandler(self)
-    }
-    
-    public final func resignBackgroundable()
-    {
-        unmakeAppStatesHandler(self)
-    }
-    
-    //MARK: App States
-    public func handleAppState(notification: NSNotification)
-    {
-        let result = appStateNotificationResult(notification)
-        handleAppStateNotification(result, object: self)
-        self.willChangeVisibility()
-        self.visible = !result
-        self.didChangeVisibility()
-    }
-    
-    public func handleAppStateChange(toBackground: Bool)
-    {
-        
-    }
-    
-    public func willChangeVisibility() {
-        
-    }
-    
-    public func didChangeVisibility() {
-        
-    }
-    
-    //MARK: View Controller Life Cycle
-    override public func viewWillAppear(animated: Bool)
-    {
-        super.viewWillAppear(animated)
-        
-        self.willChangeVisibility()
-        self.visible = true
-        self.becomeBackgroundable()
-    }
-    
-    override public func viewDidAppear(animated: Bool)
-    {
-        super.viewDidAppear(animated)
-        
-        self.didChangeVisibility()
-    }
-    
-    override public func viewWillDisappear(animated: Bool)
-    {
-        self.resignBackgroundable()
-        self.willChangeVisibility()
-        self.visible = false
-        
-        super.viewWillDisappear(animated)
-    }
-    
-    override public func viewDidDisappear(animated: Bool)
-    {
-        self.didChangeVisibility()
-        
-        super.viewDidDisappear(animated)
-    }
-}
-
-
 //MARK: - Queuer
 
 public typealias VoidClosure = ()->()
@@ -241,12 +166,12 @@ public func unmakeAppStatesHandler(object: AppStatesHandler)
     notificationCenter.removeObserver(object, name: UIApplicationWillEnterForegroundNotification, object: UIApplication.sharedApplication())
 }
 
-private func appStateNotificationResult(notification: NSNotification) -> Bool
+internal func appStateNotificationResult(notification: NSNotification) -> Bool
 {
     return notification.name == UIApplicationWillResignActiveNotification
 }
 
-private func handleAppStateNotification(bool: Bool, object: AppStatesHandler)
+internal func handleAppStateNotification(bool: Bool, object: AppStatesHandler)
 {
     object.handleAppStateChange?(bool)
 }
