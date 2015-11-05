@@ -10,36 +10,9 @@ import UIKit
 
 
 //MARK: - Backgroundable View Controller
-
-public class BackgroundableViewController: UIViewController, AppStatesHandler, Visibility
+public class BackgroundableViewController: UIViewController, Visibility
 {
     public var visible = false
-    
-    //MARK: Becoming
-    public final func becomeBackgroundable()
-    {
-        makeAppStatesHandler(self)
-    }
-    
-    public final func resignBackgroundable()
-    {
-        unmakeAppStatesHandler(self)
-    }
-    
-    //MARK: App States
-    public func handleAppState(notification: NSNotification)
-    {
-        let result = appStateNotificationResult(notification)
-        handleAppStateNotification(result, object: self)
-        self.willChangeVisibility()
-        self.visible = !result
-        self.didChangeVisibility()
-    }
-    
-    public func handleAppStateChange(toBackground: Bool)
-    {
-        
-    }
     
     public func willChangeVisibility() {
         
@@ -56,7 +29,7 @@ public class BackgroundableViewController: UIViewController, AppStatesHandler, V
         
         self.willChangeVisibility()
         self.visible = true
-        self.becomeBackgroundable()
+        self.becomeAppStatesHandler()
     }
     
     override public func viewDidAppear(animated: Bool)
@@ -68,7 +41,7 @@ public class BackgroundableViewController: UIViewController, AppStatesHandler, V
     
     override public func viewWillDisappear(animated: Bool)
     {
-        self.resignBackgroundable()
+        self.resignAppStatesHandler()
         self.willChangeVisibility()
         self.visible = false
         
@@ -86,35 +59,9 @@ public class BackgroundableViewController: UIViewController, AppStatesHandler, V
 
 //MARK: - Backgroundable Table View Controller
 
-public class BackgroundableTableViewController: UITableViewController, AppStatesHandler, Visibility
+public class BackgroundableTableViewController: UITableViewController, Visibility
 {
     public var visible = false
-    
-    //MARK: Becoming
-    public final func becomeBackgroundable()
-    {
-        makeAppStatesHandler(self)
-    }
-    
-    public final func resignBackgroundable()
-    {
-        unmakeAppStatesHandler(self)
-    }
-    
-    //MARK: App States
-    public func handleAppState(notification: NSNotification)
-    {
-        let result = appStateNotificationResult(notification)
-        handleAppStateNotification(result, object: self)
-        self.willChangeVisibility()
-        self.visible = !result
-        self.didChangeVisibility()
-    }
-    
-    public func handleAppStateChange(toBackground: Bool)
-    {
-        
-    }
     
     public func willChangeVisibility() {
         
@@ -131,7 +78,7 @@ public class BackgroundableTableViewController: UITableViewController, AppStates
         
         self.willChangeVisibility()
         self.visible = true
-        self.becomeBackgroundable()
+        self.becomeAppStatesHandler()
     }
     
     override public func viewDidAppear(animated: Bool)
@@ -143,7 +90,7 @@ public class BackgroundableTableViewController: UITableViewController, AppStates
     
     override public func viewWillDisappear(animated: Bool)
     {
-        self.resignBackgroundable()
+        self.resignAppStatesHandler()
         self.willChangeVisibility()
         self.visible = false
         
@@ -161,35 +108,9 @@ public class BackgroundableTableViewController: UITableViewController, AppStates
 
 //MARK: - Backgroundable Collection View Controller
 
-public class BackgroundableCollectionViewController: UICollectionViewController, AppStatesHandler, Visibility
+public class BackgroundableCollectionViewController: UICollectionViewController, Visibility
 {
     public var visible = false
-    
-    //MARK: Becoming
-    public final func becomeBackgroundable()
-    {
-        makeAppStatesHandler(self)
-    }
-    
-    public final func resignBackgroundable()
-    {
-        unmakeAppStatesHandler(self)
-    }
-    
-    //MARK: App States
-    public func handleAppState(notification: NSNotification)
-    {
-        let result = appStateNotificationResult(notification)
-        handleAppStateNotification(result, object: self)
-        self.willChangeVisibility()
-        self.visible = !result
-        self.didChangeVisibility()
-    }
-    
-    public func handleAppStateChange(toBackground: Bool)
-    {
-        
-    }
     
     public func willChangeVisibility() {
         
@@ -206,7 +127,7 @@ public class BackgroundableCollectionViewController: UICollectionViewController,
         
         self.willChangeVisibility()
         self.visible = true
-        self.becomeBackgroundable()
+        self.becomeAppStatesHandler()
     }
     
     override public func viewDidAppear(animated: Bool)
@@ -218,7 +139,7 @@ public class BackgroundableCollectionViewController: UICollectionViewController,
     
     override public func viewWillDisappear(animated: Bool)
     {
-        self.resignBackgroundable()
+        self.resignAppStatesHandler()
         self.willChangeVisibility()
         self.visible = false
         
