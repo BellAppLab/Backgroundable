@@ -86,8 +86,12 @@ public func endBackgroundTask() {
 
 private var concurrentQueue: (queue: NSOperationQueue, count: Int)!
 
-public func enqueue(operation: NSOperation)
+public func enqueue(operations: [NSOperation])
 {
+    if operations.isEmpty {
+        return
+    }
+    
     if concurrentQueue == nil {
         let queue = NSOperationQueue()
         queue.name = "BackgroundableQueue"
@@ -97,8 +101,15 @@ public func enqueue(operation: NSOperation)
     
     startBackgroundTask()
     
-    let completionBlock = operation.completionBlock
-    operation.completionBlock = { () -> Void in
+    for (index, item) in operations.enumerate() {
+        if index + 1 < operations.count {
+            item.addDependency(operations[index + 1])
+        }
+    }
+    
+    let last = operations.last!
+    let completionBlock = last.completionBlock
+    last.completionBlock = { () -> Void in
         if let block = completionBlock {
             toMainThread(block)
         }
@@ -115,28 +126,12 @@ public func enqueue(operation: NSOperation)
         endBackgroundTask()
     }
     
-    concurrentQueue.queue.addOperation(operation)
-}
-
-public func enqueue(var operations: [NSOperation])
-{
-    if operations.isEmpty {
-        return
-    }
-    
-    if operations.count == 1 {
-        enqueue(operations.first!)
-        return
-    }
-    
-    let first = operations.removeFirst()
-    operations.first!.addDependency(first)
-    enqueue(operations)
+    concurrentQueue.queue.addOperations(operations, waitUntilFinished: false)
 }
 
 public func toBackground(x: () -> Void)
 {
-    enqueue(NSBlockOperation(block: x))
+    enqueue([NSBlockOperation(block: x)])
 }
 
 public func toMainThread(x: () -> Void)
