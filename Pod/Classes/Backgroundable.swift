@@ -12,26 +12,27 @@ import UIKit
 //MARK: - Main
 //MARK: App States
 
-public protocol AppStatesHandler: AnyObject
+public protocol AppStatesHandler: AnyObject, NSObjectProtocol
 {
     func handleAppStateChange(toBackground: Bool)
+    func handleAppState(notification: NSNotification)
 }
 
 public extension AppStatesHandler
 {
-    public func becomeAppStatesHandler() {
+    final public func becomeAppStatesHandler() {
         let notificationCenter = NSNotificationCenter.defaultCenter()
         notificationCenter.addObserver(self, selector: "handleAppState:", name: UIApplicationWillResignActiveNotification, object: UIApplication.sharedApplication())
         notificationCenter.addObserver(self, selector: "handleAppState:", name: UIApplicationWillEnterForegroundNotification, object: UIApplication.sharedApplication())
     }
     
-    func resignAppStatesHandler() {
+    final public func resignAppStatesHandler() {
         let notificationCenter = NSNotificationCenter.defaultCenter()
         notificationCenter.removeObserver(self, name: UIApplicationWillResignActiveNotification, object: UIApplication.sharedApplication())
         notificationCenter.removeObserver(self, name: UIApplicationWillEnterForegroundNotification, object: UIApplication.sharedApplication())
     }
     
-    public func handleAppState(notification: NSNotification) {
+    final public func handleAppState(notification: NSNotification) {
         if notification.name == UIApplicationWillResignActiveNotification {
             self.handleAppStateChange(true)
         } else if notification.name == UIApplicationWillEnterForegroundNotification {
@@ -51,7 +52,7 @@ public protocol Visibility: AppStatesHandler
 
 public extension Visibility
 {
-    public func handleAppStateChange(toBackground: Bool) {
+    final public func handleAppStateChange(toBackground: Bool) {
         self.willChangeVisibility()
         self.visible = !toBackground
         self.didChangeVisibility()
@@ -65,12 +66,13 @@ public extension Visibility
 private var bgTaskId = UIBackgroundTaskInvalid
 
 public func startBackgroundTask() {
-    let currentTaskId = bgTaskId
+    var currentTaskId = bgTaskId
     bgTaskId = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler { () -> Void in
         startBackgroundTask()
     }
     if currentTaskId != UIBackgroundTaskInvalid {
         UIApplication.sharedApplication().endBackgroundTask(currentTaskId)
+        currentTaskId = UIBackgroundTaskInvalid
     }
 }
 
