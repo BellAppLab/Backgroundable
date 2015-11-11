@@ -18,7 +18,7 @@ public protocol AppStatesHandler: AnyObject, NSObjectProtocol
     func handleAppState(notification: NSNotification)
 }
 
-public extension AppStatesHandler
+extension NSObject: AppStatesHandler
 {
     final public func becomeAppStatesHandler() {
         let notificationCenter = NSNotificationCenter.defaultCenter()
@@ -32,12 +32,16 @@ public extension AppStatesHandler
         notificationCenter.removeObserver(self, name: UIApplicationWillEnterForegroundNotification, object: UIApplication.sharedApplication())
     }
     
-    final public func handleAppState(notification: NSNotification) {
+    @objc final public func handleAppState(notification: NSNotification) {
         if notification.name == UIApplicationWillResignActiveNotification {
             self.handleAppStateChange(true)
         } else if notification.name == UIApplicationWillEnterForegroundNotification {
             self.handleAppStateChange(false)
         }
+    }
+    
+    public func handleAppStateChange(toBackground: Bool) {
+        
     }
 }
 
@@ -53,9 +57,11 @@ public protocol Visibility: AppStatesHandler
 public extension Visibility
 {
     final public func handleAppStateChange(toBackground: Bool) {
-        self.willChangeVisibility()
-        self.visible = !toBackground
-        self.didChangeVisibility()
+        if (self.visible && toBackground) || (!self.visible && !toBackground) {
+            self.willChangeVisibility()
+            self.visible = !toBackground
+            self.didChangeVisibility()
+        }
     }
 }
 
