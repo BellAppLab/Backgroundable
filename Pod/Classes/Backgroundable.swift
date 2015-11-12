@@ -12,10 +12,10 @@ import UIKit
 //MARK: - Main
 //MARK: App States
 
-public protocol AppStatesHandler: AnyObject, NSObjectProtocol
+@objc public protocol AppStatesHandler: AnyObject, NSObjectProtocol
 {
     func handleAppStateChange(toBackground: Bool)
-    func handleAppState(notification: NSNotification)
+    @objc func handleAppState(notification: NSNotification)
 }
 
 extension NSObject: AppStatesHandler
@@ -52,17 +52,6 @@ public protocol Visibility: AppStatesHandler
     var visible: Bool { get set }
     func willChangeVisibility()
     func didChangeVisibility()
-}
-
-public extension Visibility
-{
-    final public func handleAppStateChange(toBackground: Bool) {
-        if (self.visible && toBackground) || (!self.visible && !toBackground) {
-            self.willChangeVisibility()
-            self.visible = !toBackground
-            self.didChangeVisibility()
-        }
-    }
 }
 
 
