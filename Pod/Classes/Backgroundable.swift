@@ -63,6 +63,7 @@ private var bgTaskId = UIBackgroundTaskInvalid
 public func startBackgroundTask() {
     var currentTaskId = bgTaskId
     bgTaskId = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler { () -> Void in
+        currentTaskId = UIBackgroundTaskInvalid
         startBackgroundTask()
     }
     if currentTaskId != UIBackgroundTaskInvalid {
