@@ -17,14 +17,6 @@ public class BackgroundableViewController: UIViewController, Visibility
         self.resignAppStatesHandler()
     }
     
-    override public func handleAppStateChange(toBackground: Bool) {
-        if (self.visible && toBackground) || (!self.visible && !toBackground) {
-            self.willChangeVisibility()
-            self.visible = !toBackground
-            self.didChangeVisibility()
-        }
-    }
-    
     //MARK: Visibility
     public var visible = false
     
@@ -76,20 +68,11 @@ public class BackgroundableViewController: UIViewController, Visibility
 
 
 //MARK: - Backgroundable Table View Controller
-
 public class BackgroundableTableViewController: UITableViewController, Visibility
 {
     //MARK: Setup
     deinit {
         self.resignAppStatesHandler()
-    }
-    
-    override public func handleAppStateChange(toBackground: Bool) {
-        if (self.visible && toBackground) || (!self.visible && !toBackground) {
-            self.willChangeVisibility()
-            self.visible = !toBackground
-            self.didChangeVisibility()
-        }
     }
     
     //MARK: Visibility
@@ -143,20 +126,11 @@ public class BackgroundableTableViewController: UITableViewController, Visibilit
 
 
 //MARK: - Backgroundable Collection View Controller
-
 public class BackgroundableCollectionViewController: UICollectionViewController, Visibility
 {
     //MARK: Setup
     deinit {
         self.resignAppStatesHandler()
-    }
-    
-    override public func handleAppStateChange(toBackground: Bool) {
-        if (self.visible && toBackground) || (!self.visible && !toBackground) {
-            self.willChangeVisibility()
-            self.visible = !toBackground
-            self.didChangeVisibility()
-        }
     }
     
     //MARK: Visibility
