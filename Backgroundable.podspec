@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name             = "Backgroundable"
-  s.version          = "0.3.6"
+  s.version          = "0.3.6.1"
   s.summary          = "A collection of handy classes, extensions and global functions to handle being in the background on iOS using Swift."
   s.homepage         = "https://github.com/BellAppLab/Backgroundable"
   s.license          = 'MIT'

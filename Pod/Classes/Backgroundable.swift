@@ -116,7 +116,15 @@ public func endBackgroundTask() {
 //MARK: Dispatching
 
 public struct Background {
-    public static var cleanAfterDone = false
+    public static var cleanAfterDone = false {
+        didSet {
+            if cleanAfterDone {
+                if Background.operationCount == 0 {
+                    Background.concurrentQueue = nil
+                }
+            }
+        }
+    }
     
     private static var concurrentQueue: NSOperationQueue!
     private static var operationCount = 0
