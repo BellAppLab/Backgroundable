@@ -64,6 +64,14 @@ public class BackgroundableViewController: UIViewController, Visibility
         
         super.viewDidDisappear(animated)
     }
+    
+    public final override func handleAppStateChange(toBackground: Bool) {
+        if (self.visible && toBackground) || (!self.visible && !toBackground) {
+            self.willChangeVisibility()
+            self.visible = !toBackground
+            self.didChangeVisibility()
+        }
+    }
 }
 
 
@@ -122,6 +130,14 @@ public class BackgroundableTableViewController: UITableViewController, Visibilit
         
         super.viewDidDisappear(animated)
     }
+    
+    public final override func handleAppStateChange(toBackground: Bool) {
+        if (self.visible && toBackground) || (!self.visible && !toBackground) {
+            self.willChangeVisibility()
+            self.visible = !toBackground
+            self.didChangeVisibility()
+        }
+    }
 }
 
 
@@ -179,5 +195,13 @@ public class BackgroundableCollectionViewController: UICollectionViewController,
         self.didChangeVisibility()
         
         super.viewDidDisappear(animated)
+    }
+    
+    public final override func handleAppStateChange(toBackground: Bool) {
+        if (self.visible && toBackground) || (!self.visible && !toBackground) {
+            self.willChangeVisibility()
+            self.visible = !toBackground
+            self.didChangeVisibility()
+        }
     }
 }

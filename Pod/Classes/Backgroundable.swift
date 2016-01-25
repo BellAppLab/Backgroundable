@@ -57,17 +57,6 @@ public protocol Visibility: AppStatesHandler
     func didChangeVisibility()
 }
 
-public extension Visibility
-{
-    public final func handleAppStateChange(toBackground: Bool) {
-        if (self.visible && toBackground) || (!self.visible && !toBackground) {
-            self.willChangeVisibility()
-            self.visible = !toBackground
-            self.didChangeVisibility()
-        }
-    }
-}
-
 
 //MARK: - Functions
 //MARK: Background Task IDs
