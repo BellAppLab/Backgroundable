@@ -24,7 +24,7 @@ queue.addOperation(NSBlockOperation(block: { () -> Void in
 **Into this**:
 
 ```swift
-toBackground {
+inTheBackground {
     //move to the background and get on with your life
 }
 ```
@@ -40,7 +40,7 @@ dispatch_async(dispatch_get_main_queue(), { () -> Void in
 **Into this**:
 
 ```swift
-toMainThread {
+onTheMainThread {
     //you're back to the main thread
 }
 ```
