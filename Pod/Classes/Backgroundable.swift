@@ -143,7 +143,7 @@ public struct Background {
         let completionBlock = last.completionBlock
         last.completionBlock = { () -> Void in
             if let block = completionBlock {
-                toMainThread(block)
+                onTheMainThread(block)
             }
             
             if Background.concurrentQueue != nil {
@@ -162,12 +162,12 @@ public struct Background {
     }
 }
 
-public func toBackground(x: () -> Void)
+public func inTheBackground(x: () -> Void)
 {
     Background.enqueue([NSBlockOperation(block: x)])
 }
 
-public func toMainThread(x: () -> Void)
+public func onTheMainThread(x: () -> Void)
 {
     dispatch_async(dispatch_get_main_queue()) {
         x()
