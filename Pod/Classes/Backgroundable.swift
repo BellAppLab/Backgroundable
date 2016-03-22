@@ -22,8 +22,8 @@ public extension AppStatesHandler
 {
     final public func becomeAppStatesHandler() {
         let notificationCenter = NSNotificationCenter.defaultCenter()
-        notificationCenter.addObserver(self, selector: "handleAppState:", name: UIApplicationWillResignActiveNotification, object: UIApplication.sharedApplication())
-        notificationCenter.addObserver(self, selector: "handleAppState:", name: UIApplicationDidBecomeActiveNotification, object: UIApplication.sharedApplication())
+        notificationCenter.addObserver(self, selector: #selector(AppStatesHandler.handleAppState(_:)), name: UIApplicationWillResignActiveNotification, object: UIApplication.sharedApplication())
+        notificationCenter.addObserver(self, selector: #selector(AppStatesHandler.handleAppState(_:)), name: UIApplicationDidBecomeActiveNotification, object: UIApplication.sharedApplication())
     }
     
     final public func resignAppStatesHandler() {
@@ -129,7 +129,7 @@ public struct Background {
             queue.name = "BackgroundableQueue"
             Background.concurrentQueue = queue
         }
-        Background.operationCount++
+        Background.operationCount += 1
         
         startBackgroundTask()
         
@@ -147,7 +147,8 @@ public struct Background {
             }
             
             if Background.concurrentQueue != nil {
-                if --Background.operationCount < 0 {
+                Background.operationCount -= 1
+                if Background.operationCount < 0 {
                     Background.operationCount = 0
                 }
                 if Background.operationCount == 0 && Background.cleanAfterDone {
