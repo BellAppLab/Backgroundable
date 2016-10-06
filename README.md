@@ -1,6 +1,6 @@
 # Backgroundable
 
-
+A collection of handy classes, extensions and global functions to handle being in the background on iOS using Swift.
 
 ## Usage
 

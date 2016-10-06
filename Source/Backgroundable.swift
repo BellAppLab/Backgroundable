@@ -1,11 +1,3 @@
-//
-//  Backgroundable.swift
-//  Project
-//
-//  Created by Bell App Lab on 05/08/15.
-//  Copyright (c) 2015 Bell App Lab. All rights reserved.
-//
-
 import UIKit
 
 
@@ -14,36 +6,36 @@ import UIKit
 
 @objc public protocol AppStatesHandler: AnyObject, NSObjectProtocol
 {
-    func handleAppStateChange(toBackground: Bool)
-    @objc func handleAppState(notification: NSNotification)
+    func handleAppStateChange(_ toBackground: Bool)
+    @objc func handleAppState(_ notification: Notification)
 }
 
 public extension AppStatesHandler
 {
     final public func becomeAppStatesHandler() {
-        let notificationCenter = NSNotificationCenter.defaultCenter()
-        notificationCenter.addObserver(self, selector: #selector(AppStatesHandler.handleAppState(_:)), name: UIApplicationWillResignActiveNotification, object: UIApplication.sharedApplication())
-        notificationCenter.addObserver(self, selector: #selector(AppStatesHandler.handleAppState(_:)), name: UIApplicationDidBecomeActiveNotification, object: UIApplication.sharedApplication())
+        let notificationCenter = NotificationCenter.default
+        notificationCenter.addObserver(self, selector: #selector(AppStatesHandler.handleAppState(_:)), name: NSNotification.Name.UIApplicationWillResignActive, object: UIApplication.shared)
+        notificationCenter.addObserver(self, selector: #selector(AppStatesHandler.handleAppState(_:)), name: NSNotification.Name.UIApplicationDidBecomeActive, object: UIApplication.shared)
     }
     
     final public func resignAppStatesHandler() {
-        let notificationCenter = NSNotificationCenter.defaultCenter()
-        notificationCenter.removeObserver(self, name: UIApplicationWillResignActiveNotification, object: UIApplication.sharedApplication())
-        notificationCenter.removeObserver(self, name: UIApplicationDidBecomeActiveNotification, object: UIApplication.sharedApplication())
+        let notificationCenter = NotificationCenter.default
+        notificationCenter.removeObserver(self, name: NSNotification.Name.UIApplicationWillResignActive, object: UIApplication.shared)
+        notificationCenter.removeObserver(self, name: NSNotification.Name.UIApplicationDidBecomeActive, object: UIApplication.shared)
     }
 }
 
 extension NSObject: AppStatesHandler
 {
-    @objc final public func handleAppState(notification: NSNotification) {
-        if notification.name == UIApplicationWillResignActiveNotification {
+    @objc final public func handleAppState(_ notification: Notification) {
+        if notification.name == NSNotification.Name.UIApplicationWillResignActive {
             self.handleAppStateChange(true)
-        } else if notification.name == UIApplicationDidBecomeActiveNotification {
+        } else if notification.name == NSNotification.Name.UIApplicationDidBecomeActive {
             self.handleAppStateChange(false)
         }
     }
     
-    public func handleAppStateChange(toBackground: Bool) {
+    public func handleAppStateChange(_ toBackground: Bool) {
         
     }
 }
@@ -62,9 +54,9 @@ public protocol Visibility: AppStatesHandler
 //MARK: Background Task IDs
 
 public struct BackgroundTask {
-    @nonobjc private static var id = UIBackgroundTaskInvalid
+    @nonobjc fileprivate static var id = UIBackgroundTaskInvalid
     
-    public private(set) static var active: Bool  = false {
+    public fileprivate(set) static var active: Bool  = false {
         didSet {
             if oldValue != active {
                 if active {
@@ -76,20 +68,20 @@ public struct BackgroundTask {
         }
     }
     
-    private static func startBackgroundTask() {
+    fileprivate static func startBackgroundTask() {
         self.endBackgroundTask()
-        self.id = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler { () -> Void in
+        self.id = UIApplication.shared.beginBackgroundTask (expirationHandler: { () -> Void in
             if self.active {
                 self.startBackgroundTask()
             }
-        }
+        })
     }
     
-    private static func endBackgroundTask() {
+    fileprivate static func endBackgroundTask() {
         if self.id == UIBackgroundTaskInvalid {
             return
         }
-        UIApplication.sharedApplication().endBackgroundTask(self.id)
+        UIApplication.shared.endBackgroundTask(self.id)
         self.id = UIBackgroundTaskInvalid
     }
 }
@@ -115,17 +107,17 @@ public struct Background {
         }
     }
     
-    private static var concurrentQueue: NSOperationQueue!
-    private static var operationCount = 0
+    fileprivate static var concurrentQueue: OperationQueue!
+    fileprivate static var operationCount = 0
     
-    private static func enqueue(operations: [NSOperation])
+    fileprivate static func enqueue(_ operations: [Operation])
     {
         if operations.isEmpty {
             return
         }
         
         if Background.concurrentQueue == nil {
-            let queue = NSOperationQueue()
+            let queue = OperationQueue()
             queue.name = "BackgroundableQueue"
             Background.concurrentQueue = queue
         }
@@ -133,7 +125,7 @@ public struct Background {
         
         startBackgroundTask()
         
-        for (index, item) in operations.enumerate() {
+        for (index, item) in operations.enumerated() {
             if index + 1 < operations.count {
                 item.addDependency(operations[index + 1])
             }
@@ -163,14 +155,14 @@ public struct Background {
     }
 }
 
-public func inTheBackground(x: () -> Void)
+public func inTheBackground(_ x: @escaping () -> Void)
 {
-    Background.enqueue([NSBlockOperation(block: x)])
+    Background.enqueue([BlockOperation(block: x)])
 }
 
-public func onTheMainThread(x: () -> Void)
+public func onTheMainThread(_ x: @escaping () -> Void)
 {
-    dispatch_async(dispatch_get_main_queue()) {
+    DispatchQueue.main.async {
         x()
     }
 }
