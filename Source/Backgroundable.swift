@@ -53,7 +53,7 @@ public protocol Visibility: AppStatesHandler
 //MARK: - Functions
 //MARK: Background Task IDs
 
-public struct BackgroundTask {
+private struct BackgroundTask {
     @nonobjc fileprivate static var id = UIBackgroundTaskInvalid
     
     public fileprivate(set) static var active: Bool  = false {
@@ -86,11 +86,11 @@ public struct BackgroundTask {
     }
 }
 
-public func startBackgroundTask() {
+private func startBackgroundTask() {
     BackgroundTask.active = true
 }
 
-public func endBackgroundTask() {
+private func endBackgroundTask() {
     BackgroundTask.active = false
 }
 

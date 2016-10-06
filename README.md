@@ -130,7 +130,7 @@ To install Backgroundable using git submodules:
 
 ```
 cd toYourProjectsFolder
-git submodule add --name Backgroundable https://github.com/BellAppLab/Backgroundable.git
+git submodule add -b submodule --name Backgroundable https://github.com/BellAppLab/Backgroundable.git
 ```
 
 Navigate to the new Backgroundable folder and drag the `Source` folder into your Xcode project.
