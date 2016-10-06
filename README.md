@@ -1,9 +1,6 @@
 # Backgroundable
 
-[![CI Status](http://img.shields.io/travis/Bell App Lab/Backgroundable.svg?style=flat)](https://travis-ci.org/Bell App Lab/Backgroundable)
-[![Version](https://img.shields.io/cocoapods/v/Backgroundable.svg?style=flat)](http://cocoapods.org/pods/Backgroundable)
-[![License](https://img.shields.io/cocoapods/l/Backgroundable.svg?style=flat)](http://cocoapods.org/pods/Backgroundable)
-[![Platform](https://img.shields.io/cocoapods/p/Backgroundable.svg?style=flat)](http://cocoapods.org/pods/Backgroundable)
+
 
 ## Usage
 
@@ -114,18 +111,14 @@ class ViewController: BackgroundableViewController {
 
 ## Requirements
 
-iOS 8+
+* iOS 8+
+* Swift 3.0
 
 ## Installation
 
-### CocoaPods
+### Cocoapods
 
-Backgroundable is available through [CocoaPods](http://cocoapods.org). To install
-it, simply add the following line to your Podfile:
-
-```ruby
-pod "Backgroundable"
-```
+Because of [this](http://stackoverflow.com/questions/39637123/cocoapods-app-xcworkspace-does-not-exists), I've dropped support for Cocoapods on this repo. I cannot have production code rely on a dependency manager that breaks this badly. 
 
 ### Git Submodules
 
@@ -140,7 +133,7 @@ cd toYourProjectsFolder
 git submodule add -b Submodule --name Backgroundable https://github.com/BellAppLab/Backgroundable.git
 ```
 
-Navigate to the new Backgroundable folder and drag the Pods folder to your Xcode project.
+Navigate to the new Backgroundable folder and drag the `Source` folder into your Xcode project.
 
 ## Author
 
