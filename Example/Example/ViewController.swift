@@ -23,11 +23,11 @@ class ViewController: BackgroundableViewController {
     }
 
     override func willChangeVisibility() {
-        print("Will change visibility; Are we visible? \(self.visible)")
+        print("Will change visibility; Are we visible? \(self.isVisible)")
     }
     
     override func didChangeVisibility() {
-        print("Did change visibility; Are we visible? \(self.visible)")
+        print("Did change visibility; Are we visible? \(self.isVisible)")
     }
 }
 

@@ -2,6 +2,8 @@
 
 A collection of handy classes, extensions and global functions to handle being in the background on iOS using Swift.
 
+_v0.5.0_
+
 ## Usage
 
 Transform this:
@@ -105,6 +107,71 @@ class ViewController: BackgroundableViewController {
         } else { //we're invisible
             
         }
+    }
+}
+```
+
+**NOTE: ** Unfortunately, you'll have to change your view controller's super class to get the ease of use above. If you'd rather implement the `Visibility` protocol yourself, make sure to implement the following methods:
+
+```swift
+deinit {
+    self.resignAppStatesHandler()
+}
+
+//Visibility
+public var visible = false
+
+open func willChangeVisibility() {
+
+}
+
+open func didChangeVisibility() {
+
+}
+
+//View Controller Life Cycle
+override open func viewDidLoad()
+{
+    super.viewDidLoad()
+
+    self.becomeAppStatesHandler()
+}
+
+override open func viewWillAppear(_ animated: Bool)
+{
+    super.viewWillAppear(animated)
+
+    self.willChangeVisibility()
+    self.visible = true
+}
+
+override open func viewDidAppear(_ animated: Bool)
+{
+    super.viewDidAppear(animated)
+
+    self.didChangeVisibility()
+}
+
+override open func viewWillDisappear(_ animated: Bool)
+{
+    self.willChangeVisibility()
+    self.visible = false
+
+    super.viewWillDisappear(animated)
+}
+
+override open func viewDidDisappear(_ animated: Bool)
+{
+    self.didChangeVisibility()
+
+    super.viewDidDisappear(animated)
+}
+
+override func handleAppStateChange(_ toBackground: Bool) {
+    if (self.visible && toBackground) || (!self.visible && !toBackground) {
+        self.willChangeVisibility()
+        self.visible = !toBackground
+        self.didChangeVisibility()
     }
 }
 ```
