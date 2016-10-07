@@ -10,7 +10,7 @@ open class BackgroundableViewController: UIViewController, Visibility
     }
     
     //MARK: Visibility
-    open var visible = false
+    public var isVisible = false
     
     open func willChangeVisibility() {
         
@@ -21,7 +21,8 @@ open class BackgroundableViewController: UIViewController, Visibility
     }
     
     //MARK: View Controller Life Cycle
-    override open func viewDidLoad() {
+    override open func viewDidLoad()
+    {
         super.viewDidLoad()
         
         self.becomeAppStatesHandler()
@@ -32,7 +33,7 @@ open class BackgroundableViewController: UIViewController, Visibility
         super.viewWillAppear(animated)
         
         self.willChangeVisibility()
-        self.visible = true
+        self.isVisible = true
     }
     
     override open func viewDidAppear(_ animated: Bool)
@@ -45,7 +46,7 @@ open class BackgroundableViewController: UIViewController, Visibility
     override open func viewWillDisappear(_ animated: Bool)
     {
         self.willChangeVisibility()
-        self.visible = false
+        self.isVisible = false
         
         super.viewWillDisappear(animated)
     }
@@ -57,10 +58,10 @@ open class BackgroundableViewController: UIViewController, Visibility
         super.viewDidDisappear(animated)
     }
     
-    public final override func handleAppStateChange(_ toBackground: Bool) {
-        if (self.visible && toBackground) || (!self.visible && !toBackground) {
+    override func handleAppStateChange(_ toBackground: Bool) {
+        if (self.isVisible && toBackground) || (!self.isVisible && !toBackground) {
             self.willChangeVisibility()
-            self.visible = !toBackground
+            self.isVisible = !toBackground
             self.didChangeVisibility()
         }
     }
@@ -76,7 +77,7 @@ open class BackgroundableTableViewController: UITableViewController, Visibility
     }
     
     //MARK: Visibility
-    open var visible = false
+    public var isVisible = false
     
     open func willChangeVisibility() {
         
@@ -87,7 +88,8 @@ open class BackgroundableTableViewController: UITableViewController, Visibility
     }
     
     //MARK: View Controller Life Cycle
-    override open func viewDidLoad() {
+    override open func viewDidLoad()
+    {
         super.viewDidLoad()
         
         self.becomeAppStatesHandler()
@@ -98,7 +100,7 @@ open class BackgroundableTableViewController: UITableViewController, Visibility
         super.viewWillAppear(animated)
         
         self.willChangeVisibility()
-        self.visible = true
+        self.isVisible = true
     }
     
     override open func viewDidAppear(_ animated: Bool)
@@ -111,7 +113,7 @@ open class BackgroundableTableViewController: UITableViewController, Visibility
     override open func viewWillDisappear(_ animated: Bool)
     {
         self.willChangeVisibility()
-        self.visible = false
+        self.isVisible = false
         
         super.viewWillDisappear(animated)
     }
@@ -123,10 +125,10 @@ open class BackgroundableTableViewController: UITableViewController, Visibility
         super.viewDidDisappear(animated)
     }
     
-    public final override func handleAppStateChange(_ toBackground: Bool) {
-        if (self.visible && toBackground) || (!self.visible && !toBackground) {
+    override func handleAppStateChange(_ toBackground: Bool) {
+        if (self.isVisible && toBackground) || (!self.isVisible && !toBackground) {
             self.willChangeVisibility()
-            self.visible = !toBackground
+            self.isVisible = !toBackground
             self.didChangeVisibility()
         }
     }
@@ -142,7 +144,7 @@ open class BackgroundableCollectionViewController: UICollectionViewController, V
     }
     
     //MARK: Visibility
-    open var visible = false
+    public var isVisible = false
     
     open func willChangeVisibility() {
         
@@ -164,7 +166,7 @@ open class BackgroundableCollectionViewController: UICollectionViewController, V
         super.viewWillAppear(animated)
         
         self.willChangeVisibility()
-        self.visible = true
+        self.isVisible = true
     }
     
     override open func viewDidAppear(_ animated: Bool)
@@ -177,7 +179,7 @@ open class BackgroundableCollectionViewController: UICollectionViewController, V
     override open func viewWillDisappear(_ animated: Bool)
     {
         self.willChangeVisibility()
-        self.visible = false
+        self.isVisible = false
         
         super.viewWillDisappear(animated)
     }
@@ -189,10 +191,10 @@ open class BackgroundableCollectionViewController: UICollectionViewController, V
         super.viewDidDisappear(animated)
     }
     
-    public final override func handleAppStateChange(_ toBackground: Bool) {
-        if (self.visible && toBackground) || (!self.visible && !toBackground) {
+    override func handleAppStateChange(_ toBackground: Bool) {
+        if (self.isVisible && toBackground) || (!self.isVisible && !toBackground) {
             self.willChangeVisibility()
-            self.visible = !toBackground
+            self.isVisible = !toBackground
             self.didChangeVisibility()
         }
     }
