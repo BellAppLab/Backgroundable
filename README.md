@@ -200,7 +200,13 @@ cd toYourProjectsFolder
 git submodule add -b submodule --name Backgroundable https://github.com/BellAppLab/Backgroundable.git
 ```
 
-Navigate to the new Backgroundable folder and drag the `Source` folder into your Xcode project.
+**Swift 2 support**
+
+```
+git submodule add -b swift2 --name Backgroundable https://github.com/BellAppLab/Backgroundable.git
+```
+
+Then, navigate to the new Backgroundable folder and drag the `Source` folder into your Xcode project.
 
 ## Author
 
