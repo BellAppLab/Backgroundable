@@ -48,7 +48,7 @@ onTheMainThread {
 
 Backgroundable exposes a nifty way to enqueue several operations that should be executed sequentially:
 
-```
+```swift
 var sequentialOperations = [Operation]()
 sequentialOperations.append(AsyncOperation({ (op) in
     print("Executing sequential operation 1")
@@ -67,7 +67,7 @@ OperationQueue.background.addSequentialOperations(sequentialOperations, waitUnti
 
 Backgroundable also provides a global background operation queue (similar to the existing `OperationQueue.main`):
 
-```
+```swift
 OperationQueue.background.addOperation {
     //do something
 }
@@ -83,7 +83,7 @@ An `AsyncOperation` is an easy way to perform asynchronous tasks in an `Operatio
 
 Say we have an asynchronous function we'd like to execute in the background:
 
-```
+```swift
 self.loadThingsFromTheInternet(callback: { (result, error) in
     //process the result
 })
@@ -91,7 +91,7 @@ self.loadThingsFromTheInternet(callback: { (result, error) in
 
 If we wrapped this in an `Operation` object, we would have one small problem:
 
-```
+```swift
 operationQueue.addOperation(BlockOperation({
     //We're on a background thread now; NICE!
     self.loadThingsFromTheInternet(callback: { (result, error) in
@@ -107,7 +107,7 @@ operationQueue.addOperation(BlockOperation({
 
 The `AsyncOperation` class solves this issue by exposing the operation object itself to its execution block and only changing its `isFinished` property once everything is done:
 
-```
+```swift
 operationQueue.addOperation(AsyncOperation({ (op) in
     //We're on a background thread now; NICE!
     self.loadThingsFromTheInternet(callback: { (result, error) in
