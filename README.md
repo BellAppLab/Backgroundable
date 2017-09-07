@@ -4,19 +4,19 @@ A collection of handy classes, extensions and global functions to handle being i
 
 _v0.5.0_
 
-## Usage
+## Executing Code in the Background
 
 Transform this:
 
 ```swift
-let queue = NSOperationQueue()
+let queue = OperationQueue()
 var bgTaskId = UIBackgroundTaskInvalid
-bgTaskId = UIApplication.sharedApplication().beginBackgroundTaskWithExpirationHandler { () -> Void in
+bgTaskId = UIApplication.shared.beginBackgroundTask { () -> Void in
     bgTaskId = UIBackgroundTaskInvalid
 }
-queue.addOperation(NSBlockOperation(block: { () -> Void in
+queue.addOperation(BlockOperation(block: { () -> Void in
     //do something in the background
-    UIApplication.sharedApplication().endBackgroundTask(bgTaskId)
+    UIApplication.shared.endBackgroundTask(bgTaskId)
 }))
 ```
     
@@ -31,9 +31,9 @@ inTheBackground {
 And transform this:
 
 ```swift
-dispatch_async(dispatch_get_main_queue(), { () -> Void in
+DispatchQueue.main.async {
     //do something on the main thread
-})
+}
 ```
     
 **Into this**:
@@ -43,23 +43,109 @@ onTheMainThread {
     //you're back to the main thread
 }
 ```
+
+## Operations
+
+Backgroundable exposes a nifty way to enqueue several operations that should be executed sequentially:
+
+```
+var sequentialOperations = [Operation]()
+sequentialOperations.append(AsyncOperation({ (op) in
+    print("Executing sequential operation 1")
+    op.finish()
+}))
+sequentialOperations.append(BlockOperation({ 
+    print("Executing sequential operation 2")
+    //The sequential operations work with any Operation objects, not just AsyncOperations
+}))
+sequentialOperations.append(BlockOperation({ (op) in
+    print("Executing sequential operation 3")
+    op.finish()
+}))
+OperationQueue.background.addSequentialOperations(sequentialOperations, waitUntilFinished: false)
+```
+
+Backgroundable also provides a global background operation queue (similar to the existing `OperationQueue.main`):
+
+```
+OperationQueue.background.addOperation {
+    //do something
+}
+```
+
+This background queue is an instance of the `BackgroundQueue` class, which automatically handles background task identifiers. Whenever an operation is enqueued, a background task identifier is generated and whenever the queue is empty, the queue automatically invalidates it. 
+
+These operations are guaranteed to be executed one after the other.
+
+### Asyncronous Operations
+
+An `AsyncOperation` is an easy way to perform asynchronous tasks in an `OperationQueue`. It's designed to make it easy to perform long-running tasks on an operation queue regardless of how many times its task needs to jump between threads. Only once everything is done, the `AsyncOperation` is removed from the queue. 
+
+Say we have an asynchronous function we'd like to execute in the background:
+
+```
+self.loadThingsFromTheInternet(callback: { (result, error) in
+    //process the result
+})
+```
+
+If we wrapped this in an `Operation` object, we would have one small problem:
+
+```
+operationQueue.addOperation(BlockOperation({
+    //We're on a background thread now; NICE!
+    self.loadThingsFromTheInternet(callback: { (result, error) in
+        //process the result
+        //god knows in which thread this function returns... 
+        //BTW, where's the BlockOperation?
+    })
+    //But wait... As soon as we call this function, the operation will already be finished and removed from the queue
+    //We haven't finished what we wanted to do!
+    //And the queue will now start executing its next operation!
+}))
+```
+
+The `AsyncOperation` class solves this issue by exposing the operation object itself to its execution block and only changing its `isFinished` property once everything is done:
+
+```
+operationQueue.addOperation(AsyncOperation({ (op) in
+    //We're on a background thread now; NICE!
+    self.loadThingsFromTheInternet(callback: { (result, error) in
+        //process the result
+        //then move to the main thread
+        onTheMainThread {
+            //go to the main thread
+            inTheBackground {
+                //do more stuff in the background again
+                //once everything is done, finish
+                op.finish()
+                //only now the queue will start working on the next thing
+            }
+        }
+    })
+}))
+```
+
+Nice, huh?
+
+## Visibility and App States
     
-And transform this: 
+Transform this: 
 
 ```swift
 class ViewController: UIViewController {
 
     deinit {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
+        NotificationCenter.default.removeObserver(self)
     }
         
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: "handleBackgroundNotification:", name: UIApplicationWillResignActiveNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(handleBackgroundNotification(_:)), name: .UIApplicationWillResignActiveNotification, object: nil)
     }
     
-    override func viewWillAppear(animated: Bool) {
+    override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
         /*
@@ -68,7 +154,7 @@ class ViewController: UIViewController {
         */
     }
         
-    override func viewWillDisappear(animated: Bool) {
+    override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
             
         /*
@@ -77,7 +163,7 @@ class ViewController: UIViewController {
         */
     }
         
-    func handleBackgroundNotification(notification: NSNotification) {
+    func handleBackgroundNotification(_ notification: Notification) {
         /*
             say the user presses the home button
             now that viewWillDisappear method will never be called and you won't be able to undo the things you wanted...
@@ -89,20 +175,20 @@ class ViewController: UIViewController {
 **Into this**:
 
 ```swift
-class ViewController: BackgroundableViewController {
+class ViewController: UIViewController, Visibility {
 
-    override func willChangeVisibility() {
+    open func willChangeVisibility() {
         //NO NEED TO CALL SUPER!
             
-        if !self.visible { //we're becoming visible, either from navigation or from the app being launched
+        if !self.isVisible { //we're becoming visible, either from navigation or from the app being launched
             // \o/
         } else { //we're becoming invisible
             
         }
     }
         
-    override func didChangeVisibility() {
-        if self.visible { //we're visible
+    open func didChangeVisibility() {
+        if self.isVisible { //we're visible
             // \o/
         } else { //we're invisible
             
@@ -111,7 +197,7 @@ class ViewController: BackgroundableViewController {
 }
 ```
 
-**NOTE: ** Unfortunately, you'll have to change your view controller's super class to get the ease of use above. If you'd rather implement the `Visibility` protocol yourself, make sure to implement the following methods:
+**NOTE: ** In order to get this ease of use, please make your `UIViewController` subclass conform to the `Visibility` protocol and implement the following methods:
 
 ```swift
 deinit {
@@ -119,6 +205,8 @@ deinit {
 }
 
 //Visibility
+var appStateNotifications: [NSObjectProtocol] = []
+
 public var visible = false
 
 open func willChangeVisibility() {
@@ -142,7 +230,7 @@ override open func viewWillAppear(_ animated: Bool)
     super.viewWillAppear(animated)
 
     self.willChangeVisibility()
-    self.visible = true
+    self.isVisible = true
 }
 
 override open func viewDidAppear(_ animated: Bool)
@@ -155,7 +243,7 @@ override open func viewDidAppear(_ animated: Bool)
 override open func viewWillDisappear(_ animated: Bool)
 {
     self.willChangeVisibility()
-    self.visible = false
+    self.isVisible = false
 
     super.viewWillDisappear(animated)
 }
@@ -165,14 +253,6 @@ override open func viewDidDisappear(_ animated: Bool)
     self.didChangeVisibility()
 
     super.viewDidDisappear(animated)
-}
-
-override func handleAppStateChange(_ toBackground: Bool) {
-    if (self.visible && toBackground) || (!self.visible && !toBackground) {
-        self.willChangeVisibility()
-        self.visible = !toBackground
-        self.didChangeVisibility()
-    }
 }
 ```
 

@@ -13,7 +13,6 @@
 		650B58B21DA6B7D60037CBD7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 650B58B11DA6B7D60037CBD7 /* Assets.xcassets */; };
 		650B58B51DA6B7D60037CBD7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 650B58B31DA6B7D60037CBD7 /* LaunchScreen.storyboard */; };
 		650B58C01DA6B83E0037CBD7 /* Backgroundable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650B58BE1DA6B83E0037CBD7 /* Backgroundable.swift */; };
-		650B58C11DA6B83E0037CBD7 /* ViewControllers+Backgroundable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650B58BF1DA6B83E0037CBD7 /* ViewControllers+Backgroundable.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,7 +25,6 @@
 		650B58B61DA6B7D60037CBD7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		650B58BC1DA6B8380037CBD7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
 		650B58BE1DA6B83E0037CBD7 /* Backgroundable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Backgroundable.swift; sourceTree = "<group>"; };
-		650B58BF1DA6B83E0037CBD7 /* ViewControllers+Backgroundable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ViewControllers+Backgroundable.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,7 +73,6 @@
 			isa = PBXGroup;
 			children = (
 				650B58BE1DA6B83E0037CBD7 /* Backgroundable.swift */,
-				650B58BF1DA6B83E0037CBD7 /* ViewControllers+Backgroundable.swift */,
 			);
 			name = Backgroundable;
 			path = ../Source;
@@ -108,7 +105,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0800;
-				LastUpgradeCheck = 0800;
+				LastUpgradeCheck = 0830;
 				ORGANIZATIONNAME = "Bell App Lab";
 				TargetAttributes = {
 					650B58A61DA6B7D60037CBD7 = {
@@ -154,7 +151,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				650B58C11DA6B83E0037CBD7 /* ViewControllers+Backgroundable.swift in Sources */,
 				650B58AD1DA6B7D60037CBD7 /* ViewController.swift in Sources */,
 				650B58AB1DA6B7D60037CBD7 /* AppDelegate.swift in Sources */,
 				650B58C01DA6B83E0037CBD7 /* Backgroundable.swift in Sources */,
@@ -201,6 +197,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -223,7 +220,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -250,6 +246,7 @@
 				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_SUSPICIOUS_MOVES = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
@@ -266,7 +263,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
