@@ -1,62 +1,82 @@
 import UIKit
 
 
-//MARK: - Main
-//MARK: App States
+//MARK: - App States
 /**
  The AppStatesHandler protocol defines an interface for objects that want to receive `UIApplicationWillResignActive` and `UIApplicationDidBecomeActive` notifications.
  
- - note If implementing this protocol yourself, make sure to call `becomeAppStatesHandler()` and `resignAppStatesHandler()` to start and stop receiving notifications.
+ - note: If implementing this protocol yourself, make sure to call `becomeAppStatesHandler()` and `resignAppStatesHandler()` to start and stop receiving notifications.
  */
-@objc protocol AppStatesHandler: AnyObject, NSObjectProtocol
+protocol AppStatesHandler: class
 {
     /**
      This is the main point of interaction this protocol provides. Implementing this method gives objects the hability to perform actions when the app is going to the background and coming from it.
      
-     - param    toBackground    lets its host object know if the app is moving to the background or coming from it
+     - note: In order to start receiving calls to this method you need to call `becomeAppStatesHandler()`. 
+     - warning: Be sure to call `resignAppStatesHandler()` once you're done.
+     - parameters:
+        - toBackground: lets its host object know if the app is moving to the background or coming from it
      */
     func handleAppStateChange(_ toBackground: Bool)
+    
     /**
-     This method is called by `NSNotificationCenter` to let the object know the app is changing states. 
+     The appStateNotifications array stores the `NSObjectProtocol` notifications that allow an AppStatesHandler to act whenever the shared application moves to and from the background. 
      
-     - note You shouldn't need to implement this method, nor override it.
+     - note: You should not need to interact with this property.
      */
-    @objc func handleAppState(_ notification: Notification)
+    var appStateNotifications: [NSObjectProtocol] { get set }
 }
 
 extension AppStatesHandler
 {
+    /**
+     Call this method to start receiving app state notifications.
+     
+     ## See Also:
+     - `handleAppStateChange(_:)`
+     */
     final func becomeAppStatesHandler() {
-        let notificationCenter = NotificationCenter.default
-        notificationCenter.addObserver(self, selector: #selector(AppStatesHandler.handleAppState(_:)), name: NSNotification.Name.UIApplicationWillResignActive, object: UIApplication.shared)
-        notificationCenter.addObserver(self, selector: #selector(AppStatesHandler.handleAppState(_:)), name: NSNotification.Name.UIApplicationDidBecomeActive, object: UIApplication.shared)
-    }
-    
-    final func resignAppStatesHandler() {
-        let notificationCenter = NotificationCenter.default
-        notificationCenter.removeObserver(self, name: NSNotification.Name.UIApplicationWillResignActive, object: UIApplication.shared)
-        notificationCenter.removeObserver(self, name: NSNotification.Name.UIApplicationDidBecomeActive, object: UIApplication.shared)
-    }
-}
+        guard self.appStateNotifications.isEmpty else { return }
 
-extension NSObject: AppStatesHandler
-{
-    @objc final func handleAppState(_ notification: Notification) {
-        if notification.name == NSNotification.Name.UIApplicationWillResignActive {
-            self.handleAppStateChange(true)
-        } else if notification.name == NSNotification.Name.UIApplicationDidBecomeActive {
-            self.handleAppStateChange(false)
-        }
-    }
-    
-    func handleAppStateChange(_ toBackground: Bool) {
+        let notificationCenter = NotificationCenter.default
         
+        self.appStateNotifications.append(notificationCenter.addObserver(forName: .UIApplicationWillResignActive,
+                                                                         object: UIApplication.shared,
+                                                                         queue: OperationQueue.main)
+        { [weak self] (notification) in
+            self?.handleAppStateChange(true)
+        })
+        
+        self.appStateNotifications.append(notificationCenter.addObserver(forName: .UIApplicationDidBecomeActive,
+                                                                         object: UIApplication.shared,
+                                                                         queue: OperationQueue.main)
+        { [weak self] (notification) in
+            self?.handleAppStateChange(false)
+        })
+    }
+    
+    /**
+     Call this method to stop receiving app state notifications.
+     
+     ## See Also:
+     - `handleAppStateChange(_:)`
+     */
+    final func resignAppStatesHandler() {
+        guard !self.appStateNotifications.isEmpty else { return }
+        
+        let notificationCenter = NotificationCenter.default
+        
+        self.appStateNotifications.forEach {
+            notificationCenter.removeObserver($0)
+        }
+
+        self.appStateNotifications = []
     }
 }
 
-//MARK: Visibility
+//MARK: - Visibility
 /**
- THe Visibility protocol defines an interface for objects to know if they are currently visible depending on the current state of the application. When your app moves to and from the background, `willChangeVisibility()` and `didChangeVisibility()` will be called and the `isVisible` will be set accordingly.
+ The Visibility protocol defines an interface for objects to know if they are currently visible depending on the current state of the application. When your app moves to and from the background, `willChangeVisibility()` and `didChangeVisibility()` will be called and the `isVisible` will be set accordingly.
  */
 protocol Visibility: AppStatesHandler
 {
@@ -67,153 +87,304 @@ protocol Visibility: AppStatesHandler
     /**
      Called immediately before changing visibility.
      
-     - note When this method is called, `isVisible` will not have been set to the its new state. Therefore, if the app is in the foreground and moving to the background, `isVisible` will be set to `true` at this point.
+     - note: When this method is called, `isVisible` will not have been set to the its new state. Therefore, if the app is in the foreground and moving to the background, `isVisible` will be set to `true` at this point.
      */
     func willChangeVisibility()
     /**
      Called after the visibility transition has finished.
      
-     - note When this method is called, `isVisible` will already have been set to the its new state. Therefore, if the app is in the foreground and moving to the background, `isVisible` will be set to `false` at this point.
+     - note: When this method is called, `isVisible` will already have been set to the its new state. Therefore, if the app is in the foreground and moving to the background, `isVisible` will be set to `false` at this point.
      */
     func didChangeVisibility()
 }
 
+extension Visibility
+{
+    /**
+     Default implementation for the `AppStatesHandler` protocol.
+     
+     ## See Also:
+     - `AppStatesHandler.handleAppStateChange(_:)`
+     */
+    final func handleAppStateChange(_ toBackground: Bool) {
+        if self.isVisible && toBackground || !self.isVisible && !toBackground {
+            self.willChangeVisibility()
+            self.isVisible = !toBackground
+            self.didChangeVisibility()
+        }
+    }
+}
 
-//MARK: - Functions
-//MARK: Background Task IDs
 
-private struct BackgroundTask {
-    @nonobjc fileprivate static var id = UIBackgroundTaskInvalid
+//MARK: - Operations
+/**
+ An `AsyncOperation` is an easy way to perform asynchronous tasks in an `OperationQueue`. It's designed to make it easy to perform long-running tasks on an operation queue regardless of how many times its task needs to jump between threads. Only once everything is done, the `AsyncOperation` is removed from the queue. 
+ 
+ ## Example
+ 
+ ```
+ operationQueue.addOperation(AsyncOperation({ (op) in
+     //We're on a background thread now; NICE!
+     self.loadThingsFromTheInternet(callback: { (result, error) in
+         //process the result
+         inTheBackground {
+             //do more stuff in the background again
+             //once everything is done, finish
+             op.finish()
+             //only now the queue will start working on the next thing
+         }
+     })
+ }))
+ ```
+ 
+ Optionally, you can change the operation's default timeout time:
+ 
+ ```
+ AsyncOperation(timeout: 60) { (op) in
+    //do something that will take less than a minute
+ }
+ ```
+ 
+ - warning: Be sure to call `op.finish()` once your operation is done, otherwise it will time out. By default, AsyncOperations time out after 10 seconds. This is to avoid blocking any dependencies in the queue.
+ 
+ ## See Also:
+ - `BackgroundQueue`
+ */
+final class AsyncOperation: Operation
+{
+    override var isExecuting: Bool {
+        return self.isWorking
+    }
     
-    fileprivate static var active: Bool  = false {
+    override var isFinished: Bool {
+        return self.isDone
+    }
+    
+    /**
+     Custom flag used to emit KVO notifications regarding the `isExecuting` property.
+     */
+    private var isWorking: Bool = false {
+        willSet {
+            guard newValue != isWorking else { return }
+            self.willChangeValue(forKey: "isExecuting")
+        }
         didSet {
-            if oldValue != active {
-                if active {
+            guard oldValue != isWorking else { return }
+            self.didChangeValue(forKey: "isExecuting")
+        }
+    }
+    
+    /**
+     Custom flag used to emit KVO notifications regarding the `isFinished` property.
+     */
+    private var isDone: Bool = false {
+        willSet {
+            guard newValue != isDone else { return }
+            self.willChangeValue(forKey: "isFinished")
+        }
+        didSet {
+            guard oldValue != isDone else { return }
+            self.didChangeValue(forKey: "isFinished")
+        }
+    }
+    
+    override func start() {
+        guard !self.isCancelled else { return }
+        
+        self.isWorking = true
+        
+        DispatchQueue.main.async { [weak self] _ in
+            guard let strongSelf = self else { return }
+            Timer.scheduledTimer(timeInterval: strongSelf.timeout,
+                                 target: strongSelf,
+                                 selector: #selector(strongSelf.didTimeout(_:)),
+                                 userInfo: nil,
+                                 repeats: false)
+        }
+        
+        unowned let weakSelf = self
+        self.closure(weakSelf)
+    }
+    
+    /**
+     Call this method when your operation is complete and should be removed from the queue. 
+     
+     Calling this function sets the `isExecuting` property to `false` and `isFinished` property to `true`.
+     */
+    func finish() {
+        self.isWorking = false
+        self.isDone = true
+    }
+    
+    /**
+     If an operation never calls its `finish()` method, a Timer will fire and execute this method.
+     */
+    @objc private func didTimeout(_ timer: Timer) {
+        timer.invalidate()
+        guard self.isDone == false else { return }
+        self.finish()
+    }
+    
+    override func cancel() {
+        super.cancel()
+        self.finish()
+    }
+    
+    /// The closure to be executed by the operation.
+    private let closure: (_ operation: AsyncOperation) -> Void
+    /// The timeout interval before the operation is removed from the queue.
+    private let timeout: TimeInterval
+    
+    /**
+     Designated initialiser for a new `AsyncOperation`.
+     
+     - parameters:
+        - timeout: The time in seconds after which this operation should be marked as finished and removed from the queue. 
+        - closure: The closure to be executed by the operation. The closure takes a `AsyncOperation` parameter. Call `finish()` on the object passed here.
+     */
+    required init(timeout: TimeInterval = 10,
+                  _ closure: @escaping (_ operation: AsyncOperation) -> Void)
+    {
+        self.closure = closure
+        self.timeout = timeout
+        super.init()
+    }
+}
+
+//MARK: Operation Queue
+private var backgroundQueueContext = 0
+
+/**
+ The `BackgroundQueue` class is a concrete subclass of the `OperationQueue` that automatically handles background task identifiers. Whenever an operation is enqueued, a background task identifier is generated and whenever the queue is empty, the queue automatically invalidates it.
+ 
+ - note: These operations are guaranteed to be executed one after the other.
+ */
+final class BackgroundQueue: OperationQueue
+{
+    private var backgroundTaskId = UIBackgroundTaskInvalid
+    
+    private func startBackgroundTask() {
+        guard self.backgroundTaskId == UIBackgroundTaskInvalid else { return }
+        
+        self.backgroundTaskId = UIApplication.shared.beginBackgroundTask { [weak self] _ in
+            self?.endBackgroundTask()
+        }
+    }
+    
+    private func endBackgroundTask() {
+        guard self.backgroundTaskId != UIBackgroundTaskInvalid else { return }
+        
+        //If iOS invalidates background tasks (because the we ran out of background time), we should cancel all existing operations here
+        if self.operationCount > 0 {
+            self.cancelAllOperations()
+        }
+        
+        UIApplication.shared.endBackgroundTask(self.backgroundTaskId)
+        self.backgroundTaskId = UIBackgroundTaskInvalid
+    }
+    
+    deinit {
+        self.removeObserver(self,
+                            forKeyPath: #keyPath(OperationQueue.operationCount))
+    }
+    
+    override init() {
+        super.init()
+        self.name = "com.bellapplab.BackgroundQueue"
+        
+        self.addObserver(self,
+                         forKeyPath: #keyPath(OperationQueue.operationCount),
+                         options: .new,
+                         context: &backgroundQueueContext)
+    }
+    
+    override func observeValue(forKeyPath keyPath: String?,
+                                      of object: Any?,
+                                      change: [NSKeyValueChangeKey : Any]?,
+                                      context: UnsafeMutableRawPointer?)
+    {
+        if context == &backgroundQueueContext {
+            if let new = change?[.newKey] as? Int {
+                if new > 0 {
                     self.startBackgroundTask()
-                } else {
+                } else if new == 0 {
                     self.endBackgroundTask()
                 }
             }
-        }
-    }
-    
-    private static func startBackgroundTask() {
-        self.endBackgroundTask()
-        self.id = UIApplication.shared.beginBackgroundTask (expirationHandler: { () -> Void in
-            if self.active {
-                self.startBackgroundTask()
-            }
-        })
-    }
-    
-    private static func endBackgroundTask() {
-        if self.id == UIBackgroundTaskInvalid {
             return
         }
-        UIApplication.shared.endBackgroundTask(self.id)
-        self.id = UIBackgroundTaskInvalid
+        
+        super.observeValue(forKeyPath: keyPath,
+                           of: object,
+                           change: change,
+                           context: context)
     }
 }
 
-private func startBackgroundTask() {
-    BackgroundTask.active = true
-}
 
-private func endBackgroundTask() {
-    BackgroundTask.active = false
-}
-
-//MARK: Dispatching
-/**
- Defines a set of states regarding the execution of code in the background.
- */
-struct Background {
+extension OperationQueue
+{
     /**
-     When set to `true`, the underlying `OperationQueue` will be set to `nil` after all operations have been completed and a new one will be created when needed. The default value is `false`.
+     The global background queue.
      
-     - note It's recommended to set this to true only if background operations are sporadic within the context of your app. If you constantly send code to be executed in the background, set this option to `false`.
+     The returned queue is an instance of `BackgroundQueue`.
+     
+     ## See Also:
+     `Backgroundable.BackgroundQueue`
      */
-    static var cleanAfterDone = false {
-        didSet {
-            if cleanAfterDone {
-                if Background.operationCount == 0 {
-                    Background.concurrentQueue = nil
-                }
-            }
-        }
-    }
-    
-    private static var concurrentQueue: OperationQueue!
-    private static var operationCount = 0
+    static let background = BackgroundQueue()
     
     /**
-     Enqueues several `Operation` objects to be executed in the background.
+     Takes several operations and sets them as dependant on one another, so they are executed sequentially. In other words:
      
-     - param    operations  An array of `Operation` objects to be executed.
+     ```
+     var operations = [firstOperation, secondOperation, thirdOperation]
+     queue.addSequentialOperations(operations, waitUntilFinished: false)
+     
+     //is equivalent to
+     
+     secondOperation.addDependency(firstOperation)
+     thirdOperation.addDependency(secondOperation)
+     ```
+     
+     - parameters:
+        - ops: The array of `Operations` to be enqueued.
+        - waitUntilFinished: See `OperationQueue.addOperations(_:waitUntilFinished:)`
      */
-    static func enqueue(_ operations: [Operation])
+    func addSequentialOperations(_ ops: [Operation],
+                                 waitUntilFinished wait: Bool)
     {
-        if operations.isEmpty {
-            return
-        }
-        
-        if Background.concurrentQueue == nil {
-            let queue = OperationQueue()
-            queue.name = "BackgroundableQueue"
-            Background.concurrentQueue = queue
-        }
-        Background.operationCount += 1
-        
-        startBackgroundTask()
-        
-        for (index, item) in operations.enumerated() {
-            if index + 1 < operations.count {
-                item.addDependency(operations[index + 1])
+        if ops.count > 1 {
+            for i in 1..<ops.count {
+                ops[i].addDependency(ops[i - 1])
             }
         }
         
-        let last = operations.last!
-        let completionBlock = last.completionBlock
-        last.completionBlock = { () -> Void in
-            if let block = completionBlock {
-                onTheMainThread(block)
-            }
-            
-            if Background.concurrentQueue != nil {
-                Background.operationCount -= 1
-                if Background.operationCount < 0 {
-                    Background.operationCount = 0
-                }
-                if Background.operationCount == 0 && Background.cleanAfterDone {
-                    Background.concurrentQueue = nil
-                }
-            }
-            
-            endBackgroundTask()
-        }
-        
-        Background.concurrentQueue.addOperations(operations, waitUntilFinished: false)
+        self.addOperations(ops,
+                           waitUntilFinished: wait)
     }
 }
 
+
+//MARK: - Functions
 /**
  The easiest way to execute code in the background. 
  
- - param    x   The closure to be executed in the background.
+ - parameters:
+    - closure: The closure to be executed in the background.
  */
-public func inTheBackground(_ x: @escaping () -> Void)
+public func inTheBackground(_ closure: @escaping () -> Void)
 {
-    Background.enqueue([BlockOperation(block: x)])
+    OperationQueue.background.addOperation(closure)
 }
 
 /**
- The easiest way to come back to the main thread.
+ The easiest way to excute code on the main thread.
  
- - param    x   The closure to be executed on the main thread.
+ - parameters:
+    - closure: The closure to be executed on the main thread.
  */
-public func onTheMainThread(_ x: @escaping () -> Void)
+public func onTheMainThread(_ closure: @escaping () -> Void)
 {
-    DispatchQueue.main.async {
-        x()
-    }
+    OperationQueue.main.addOperation(closure)
 }
