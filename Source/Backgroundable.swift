@@ -35,7 +35,7 @@ extension AppStatesHandler
      ## See Also:
      - `handleAppStateChange(_:)`
      */
-    final func becomeAppStatesHandler() {
+    func becomeAppStatesHandler() {
         guard self.appStateNotifications.isEmpty else { return }
 
         let notificationCenter = NotificationCenter.default
@@ -61,7 +61,7 @@ extension AppStatesHandler
      ## See Also:
      - `handleAppStateChange(_:)`
      */
-    final func resignAppStatesHandler() {
+    func resignAppStatesHandler() {
         guard !self.appStateNotifications.isEmpty else { return }
         
         let notificationCenter = NotificationCenter.default
@@ -106,7 +106,7 @@ extension Visibility
      ## See Also:
      - `AppStatesHandler.handleAppStateChange(_:)`
      */
-    final func handleAppStateChange(_ toBackground: Bool) {
+    func handleAppStateChange(_ toBackground: Bool) {
         if self.isVisible && toBackground || !self.isVisible && !toBackground {
             self.willChangeVisibility()
             self.isVisible = !toBackground
@@ -193,13 +193,18 @@ final class AsyncOperation: Operation
         
         self.isWorking = true
         
-        DispatchQueue.main.async { [weak self] _ in
+        /**
+         If an operation never calls its `finish()` method, a Timer will fire and execute this method.
+         */
+        DispatchQueue.main.async { [weak self] in
             guard let strongSelf = self else { return }
-            Timer.scheduledTimer(timeInterval: strongSelf.timeout,
-                                 target: strongSelf,
-                                 selector: #selector(strongSelf.didTimeout(_:)),
-                                 userInfo: nil,
+            Timer.scheduledTimer(withTimeInterval: strongSelf.timeout,
                                  repeats: false)
+            { (timer) in
+                timer.invalidate()
+                guard strongSelf.isDone == false else { return }
+                strongSelf.finish()
+            }
         }
         
         unowned let weakSelf = self
@@ -214,15 +219,6 @@ final class AsyncOperation: Operation
     func finish() {
         self.isWorking = false
         self.isDone = true
-    }
-    
-    /**
-     If an operation never calls its `finish()` method, a Timer will fire and execute this method.
-     */
-    @objc private func didTimeout(_ timer: Timer) {
-        timer.invalidate()
-        guard self.isDone == false else { return }
-        self.finish()
     }
     
     override func cancel() {
@@ -266,7 +262,7 @@ final class BackgroundQueue: OperationQueue
     private func startBackgroundTask() {
         guard self.backgroundTaskId == UIBackgroundTaskInvalid else { return }
         
-        self.backgroundTaskId = UIApplication.shared.beginBackgroundTask { [weak self] _ in
+        self.backgroundTaskId = UIApplication.shared.beginBackgroundTask { [weak self] in
             self?.endBackgroundTask()
         }
     }

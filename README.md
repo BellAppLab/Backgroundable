@@ -2,7 +2,7 @@
 
 A collection of handy classes, extensions and global functions to handle being in the background on iOS using Swift.
 
-_v0.5.0_
+_v0.5.1_
 
 ## Executing Code in the Background
 
@@ -258,8 +258,8 @@ override open func viewDidDisappear(_ animated: Bool)
 
 ## Requirements
 
-* iOS 8+
-* Swift 3.0
+* iOS 10+
+* Swift 4.0
 
 ## Installation
 
@@ -278,6 +278,12 @@ To install Backgroundable using git submodules:
 ```
 cd toYourProjectsFolder
 git submodule add -b submodule --name Backgroundable https://github.com/BellAppLab/Backgroundable.git
+```
+
+**Swift 3 support**
+
+```
+git submodule add -b swift3 --name Backgroundable https://github.com/BellAppLab/Backgroundable.git
 ```
 
 **Swift 2 support**
