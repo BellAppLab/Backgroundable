@@ -287,6 +287,7 @@ final class BackgroundQueue: OperationQueue
     override init() {
         super.init()
         self.name = "com.bellapplab.BackgroundQueue"
+        self.qualityOfService = .background
         
         self.addObserver(self,
                          forKeyPath: #keyPath(OperationQueue.operationCount),
