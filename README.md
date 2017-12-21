@@ -2,7 +2,7 @@
 
 A collection of handy classes, extensions and global functions to handle being in the background on iOS using Swift.
 
-_v0.5.2_
+_v0.6.0_
 
 ## Executing Code in the Background
 
@@ -258,8 +258,8 @@ override open func viewDidDisappear(_ animated: Bool)
 
 ## Requirements
 
-* iOS 10+
-* Swift 4.0
+* iOS 8+
+* Swift 3.2+
 
 ## Installation
 

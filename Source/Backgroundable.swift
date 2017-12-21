@@ -198,12 +198,20 @@ final class AsyncOperation: Operation
          */
         DispatchQueue.main.async { [weak self] in
             guard let strongSelf = self else { return }
-            Timer.scheduledTimer(withTimeInterval: strongSelf.timeout,
-                                 repeats: false)
-            { (timer) in
-                timer.invalidate()
-                guard strongSelf.isDone == false else { return }
-                strongSelf.finish()
+            if #available(iOS 10.0, *) {
+                Timer.scheduledTimer(withTimeInterval: strongSelf.timeout,
+                                     repeats: false)
+                { (timer) in
+                    defer { timer.invalidate() }
+                    guard strongSelf.isDone == false else { return }
+                    strongSelf.finish()
+                }
+            } else {
+                Timer.scheduledTimer(timeInterval: strongSelf.timeout,
+                                     target: strongSelf,
+                                     selector: #selector(strongSelf.handleTimeoutTimer(_:)),
+                                     userInfo: nil,
+                                     repeats: false)
             }
         }
         
@@ -244,6 +252,15 @@ final class AsyncOperation: Operation
         self.closure = closure
         self.timeout = timeout
         super.init()
+    }
+}
+
+extension AsyncOperation
+{
+    @objc func handleTimeoutTimer(_ timer: Timer) {
+        defer { timer.invalidate() }
+        guard self.isDone == false else { return }
+        self.finish()
     }
 }
 
@@ -329,6 +346,7 @@ extension OperationQueue
      ## See Also:
      `Backgroundable.BackgroundQueue`
      */
+    @objc(backgroundQueue)
     static let background = BackgroundQueue()
     
     /**
