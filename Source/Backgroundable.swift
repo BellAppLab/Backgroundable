@@ -177,7 +177,7 @@ final class AsyncOperation: Operation
     /**
      Custom flag used to emit KVO notifications regarding the `isFinished` property.
      */
-    private var isDone: Bool = false {
+    fileprivate var isDone: Bool = false {
         willSet {
             guard newValue != isDone else { return }
             self.willChangeValue(forKey: "isFinished")
