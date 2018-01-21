@@ -267,6 +267,10 @@ extension AsyncOperation
 //MARK: Operation Queue
 private var backgroundQueueContext = 0
 
+protocol BackgroundQueueDelegate: class {
+    func backgroundQueueDidFinishOperations(_ queue: BackgroundQueue)
+}
+
 /**
  The `BackgroundQueue` class is a concrete subclass of the `OperationQueue` that automatically handles background task identifiers. Whenever an operation is enqueued, a background task identifier is generated and whenever the queue is empty, the queue automatically invalidates it.
  
@@ -275,6 +279,8 @@ private var backgroundQueueContext = 0
 final class BackgroundQueue: OperationQueue
 {
     private var backgroundTaskId = UIBackgroundTaskInvalid
+    
+    weak var delegate: BackgroundQueueDelegate?
     
     private func startBackgroundTask() {
         guard self.backgroundTaskId == UIBackgroundTaskInvalid else { return }
@@ -323,6 +329,7 @@ final class BackgroundQueue: OperationQueue
                     self.startBackgroundTask()
                 } else if new == 0 {
                     self.endBackgroundTask()
+                    self.reportFinishToDelegate()
                 }
             }
             return
@@ -332,6 +339,14 @@ final class BackgroundQueue: OperationQueue
                            of: object,
                            change: change,
                            context: context)
+    }
+    
+    private func reportFinishToDelegate() {
+        guard let delegate = self.delegate else { return }
+        onTheMainThread { [weak self] in
+            guard let strongSelf = self else { return }
+            delegate.backgroundQueueDidFinishOperations(strongSelf)
+        }
     }
 }
 
