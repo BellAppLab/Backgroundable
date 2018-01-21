@@ -313,11 +313,11 @@ final class BackgroundQueue: OperationQueue
     }
     
     override func observeValue(forKeyPath keyPath: String?,
-                                      of object: Any?,
-                                      change: [NSKeyValueChangeKey : Any]?,
-                                      context: UnsafeMutableRawPointer?)
+                               of object: Any?,
+                               change: [NSKeyValueChangeKey : Any]?,
+                               context: UnsafeMutableRawPointer?)
     {
-        if context == &backgroundQueueContext {
+        if context == &backgroundQueueContext, (object as? BackgroundQueue) === self {
             if let new = change?[.newKey] as? Int {
                 if new > 0 {
                     self.startBackgroundTask()
