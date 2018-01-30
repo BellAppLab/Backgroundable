@@ -163,51 +163,35 @@ final class AsyncOperation: Operation
     /**
      Custom flag used to emit KVO notifications regarding the `isExecuting` property.
      */
-    public private(set) var isWorking: Bool = false
-    private var _isWorking: Bool = false
+    private var isWorking: Bool = false {
+        willSet {
+            guard newValue != isWorking else { return }
+            self.willChangeValue(forKey: "isExecuting")
+        }
+        didSet {
+            guard oldValue != isWorking else { return }
+            self.didChangeValue(forKey: "isExecuting")
+        }
+    }
     
     /**
      Custom flag used to emit KVO notifications regarding the `isFinished` property.
      */
-    public private(set) var isDone: Bool = false
-    private var _isDone: Bool = false
-    
-    private func set(isWorking: Bool? = nil,
-                     isDone: Bool? = nil)
-    {
-        var didChangeFinished: Bool = false
-        if let isDone = isDone {
-            if self._isDone != isDone {
-                self.willChangeValue(forKey: "isFinished")
-                didChangeFinished = true
-            }
-            self._isDone = isDone
+    fileprivate var isDone: Bool = false {
+        willSet {
+            guard newValue != isDone else { return }
+            self.willChangeValue(forKey: "isFinished")
         }
-        
-        var didChangeExecution: Bool = false
-        if let isWorking = isWorking {
-            if self._isWorking != isWorking {
-                self.willChangeValue(forKey: "isExecuting")
-                didChangeExecution = true
-            }
-            self._isWorking = isWorking
-        }
-        
-        self.isDone = self._isDone
-        self.isWorking = self._isWorking
-        
-        if didChangeFinished {
+        didSet {
+            guard oldValue != isDone else { return }
             self.didChangeValue(forKey: "isFinished")
-        }
-        if didChangeExecution {
-            self.didChangeValue(forKey: "isExecuting")
         }
     }
     
     override func start() {
         guard !self.isCancelled else { return }
         
-        self.set(isWorking: true)
+        self.isWorking = true
         
         /**
          If an operation never calls its `finish()` method, a Timer will fire and execute this method.
@@ -240,14 +224,14 @@ final class AsyncOperation: Operation
      Calling this function sets the `isExecuting` property to `false` and `isFinished` property to `true`.
      */
     func finish() {
-        self.set(isWorking: false,
-                 isDone: true)
+        self.isDone = true
+        self.isWorking = false
     }
     
     override func cancel() {
         guard !self.isFinished else { return }
         super.cancel()
-        self.set(isWorking: false)
+        self.isWorking = false
     }
     
     /// The closure to be executed by the operation.
