@@ -196,7 +196,9 @@ final class AsyncOperation: Operation
     override func start() {
         guard !self.isCancelled else { return }
         
-        self.set(isWorking: true)
+        DispatchQueue.global().async { [weak self] in
+            self?.set(isWorking: true)
+        }
         
         /**
          If an operation never calls its `finish()` method, a Timer will fire and execute this method.
