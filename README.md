@@ -2,7 +2,7 @@
 
 A collection of handy classes, extensions and global functions to handle being in the background on iOS using Swift.
 
-_v0.7.6_
+_v0.8.0_
 
 ## Executing Code in the Background
 
