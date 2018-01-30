@@ -152,14 +152,6 @@ extension Visibility
  */
 final class AsyncOperation: Operation
 {
-    override var isExecuting: Bool {
-        return self.isWorking
-    }
-    
-    override var isFinished: Bool {
-        return self.isDone
-    }
-    
     /**
      Custom flag used to emit KVO notifications regarding the `isExecuting` property.
      */
@@ -173,29 +165,31 @@ final class AsyncOperation: Operation
     private func set(isWorking: Bool? = nil,
                      isDone: Bool? = nil)
     {
-        var didChangeExecution: Bool = false
-        if let isWorking = isWorking {
-            if self.isWorking != isWorking {
-                self.willChangeValue(forKey: "isExecuting")
-                didChangeExecution = true
+        DispatchQueue.global().sync {
+            var didChangeFinished: Bool = false
+            if let isDone = isDone {
+                if self.isDone != isDone {
+                    self.willChangeValue(forKey: "isFinished")
+                    didChangeFinished = true
+                }
+                self.isDone = isDone
             }
-            self.isWorking = isWorking
-        }
-        
-        var didChangeFinished: Bool = false
-        if let isDone = isDone {
-            if self.isDone != isDone {
-                self.willChangeValue(forKey: "isFinished")
-                didChangeFinished = true
+            
+            var didChangeExecution: Bool = false
+            if let isWorking = isWorking {
+                if self.isWorking != isWorking {
+                    self.willChangeValue(forKey: "isExecuting")
+                    didChangeExecution = true
+                }
+                self.isWorking = isWorking
             }
-            self.isDone = isDone
-        }
-        
-        if didChangeExecution {
-            self.didChangeValue(forKey: "isExecuting")
-        }
-        if didChangeFinished {
-            self.didChangeValue(forKey: "isFinished")
+            
+            if didChangeFinished {
+                self.didChangeValue(forKey: "isFinished")
+            }
+            if didChangeExecution {
+                self.didChangeValue(forKey: "isExecuting")
+            }
         }
     }
     
