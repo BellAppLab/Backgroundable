@@ -152,53 +152,62 @@ extension Visibility
  */
 final class AsyncOperation: Operation
 {
+    override var isExecuting: Bool {
+        return self.isWorking
+    }
+    
+    override var isFinished: Bool {
+        return self.isDone
+    }
+    
     /**
      Custom flag used to emit KVO notifications regarding the `isExecuting` property.
      */
-    private var isWorking: Bool = false
+    public private(set) var isWorking: Bool = false
+    private var _isWorking: Bool = false
     
     /**
      Custom flag used to emit KVO notifications regarding the `isFinished` property.
      */
-    private var isDone: Bool = false
+    public private(set) var isDone: Bool = false
+    private var _isDone: Bool = false
     
     private func set(isWorking: Bool? = nil,
                      isDone: Bool? = nil)
     {
-        DispatchQueue.global().sync {
-            var didChangeFinished: Bool = false
-            if let isDone = isDone {
-                if self.isDone != isDone {
-                    self.willChangeValue(forKey: "isFinished")
-                    didChangeFinished = true
-                }
-                self.isDone = isDone
+        var didChangeFinished: Bool = false
+        if let isDone = isDone {
+            if self._isDone != isDone {
+                self.willChangeValue(forKey: "isFinished")
+                didChangeFinished = true
             }
-            
-            var didChangeExecution: Bool = false
-            if let isWorking = isWorking {
-                if self.isWorking != isWorking {
-                    self.willChangeValue(forKey: "isExecuting")
-                    didChangeExecution = true
-                }
-                self.isWorking = isWorking
+            self._isDone = isDone
+        }
+        
+        var didChangeExecution: Bool = false
+        if let isWorking = isWorking {
+            if self._isWorking != isWorking {
+                self.willChangeValue(forKey: "isExecuting")
+                didChangeExecution = true
             }
-            
-            if didChangeFinished {
-                self.didChangeValue(forKey: "isFinished")
-            }
-            if didChangeExecution {
-                self.didChangeValue(forKey: "isExecuting")
-            }
+            self._isWorking = isWorking
+        }
+        
+        self.isDone = self._isDone
+        self.isWorking = self._isWorking
+        
+        if didChangeFinished {
+            self.didChangeValue(forKey: "isFinished")
+        }
+        if didChangeExecution {
+            self.didChangeValue(forKey: "isExecuting")
         }
     }
     
     override func start() {
         guard !self.isCancelled else { return }
         
-        DispatchQueue.global().async { [weak self] in
-            self?.set(isWorking: true)
-        }
+        self.set(isWorking: true)
         
         /**
          If an operation never calls its `finish()` method, a Timer will fire and execute this method.
