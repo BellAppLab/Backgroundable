@@ -203,8 +203,7 @@ final class AsyncOperation: Operation
                                      repeats: false)
                 { (timer) in
                     defer { timer.invalidate() }
-                    guard strongSelf.isDone == false else { return }
-                    strongSelf.finish()
+                    strongSelf.cancel()
                 }
             } else {
                 Timer.scheduledTimer(timeInterval: strongSelf.timeout,
@@ -230,8 +229,9 @@ final class AsyncOperation: Operation
     }
     
     override func cancel() {
+        guard !self.isDone else { return }
         super.cancel()
-        self.finish()
+        self.isWorking = false
     }
     
     /// The closure to be executed by the operation.
@@ -259,8 +259,7 @@ extension AsyncOperation
 {
     @objc func handleTimeoutTimer(_ timer: Timer) {
         defer { timer.invalidate() }
-        guard self.isDone == false else { return }
-        self.finish()
+        self.cancel()
     }
 }
 
