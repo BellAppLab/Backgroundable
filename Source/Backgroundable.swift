@@ -125,14 +125,14 @@ extension AppStatesHandler
         
         self.appStateNotifications.append(notificationCenter.addObserver(forName: .UIApplicationWillResignActive,
                                                                          object: UIApplication.shared,
-                                                                         queue: OperationQueue.main)
+                                                                         queue: .background)
         { [weak self] (notification) in
             self?.handleAppStateChange(true)
         })
         
         self.appStateNotifications.append(notificationCenter.addObserver(forName: .UIApplicationDidBecomeActive,
                                                                          object: UIApplication.shared,
-                                                                         queue: OperationQueue.main)
+                                                                         queue: .background)
         { [weak self] (notification) in
             self?.handleAppStateChange(false)
         })
@@ -191,9 +191,13 @@ extension Visibility
      */
     func handleAppStateChange(_ toBackground: Bool) {
         if self.isVisible && toBackground || !self.isVisible && !toBackground {
-            self.willChangeVisibility()
-            self.isVisible = !toBackground
-            self.didChangeVisibility()
+            onTheMainThread { [weak self] in
+                self?.willChangeVisibility()
+            }
+            onTheMainThread { [weak self] in
+                self?.isVisible = !toBackground
+                self?.didChangeVisibility()
+            }
         }
     }
 }
