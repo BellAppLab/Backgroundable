@@ -100,9 +100,9 @@ class BackgroundQueueTests: XCTestCase
     
     let testSequentialOperationsInTheBackgroundDescription = "Executing sequential operations in the background"
     func testSequentialOperationsInTheBackground() {
-        let description1 = testSequentialOperationsInTheBackgroundDescription + "_1"
-        let description2 = testSequentialOperationsInTheBackgroundDescription + "_2"
-        let description3 = testSequentialOperationsInTheBackgroundDescription + "_3"
+        let description1 = testSequentialOperationsInTheBackgroundDescription + " _1"
+        let description2 = testSequentialOperationsInTheBackgroundDescription + " _2"
+        let description3 = testSequentialOperationsInTheBackgroundDescription + " _3"
         
         var hasFulfilledOperation1 = false
         var hasFulfilledOperation2 = false
@@ -177,7 +177,7 @@ class BackgroundQueueTests: XCTestCase
     func testTimeout() {
         expectations.append(self.expectation(description: testTimeoutDescription))
         
-        let executionDescription = testTimeoutDescription + "_executed"
+        let executionDescription = testTimeoutDescription + " _executed"
         expectations.append(self.expectation(description: executionDescription))
         
         //A timeout AsyncOperation
@@ -185,6 +185,8 @@ class BackgroundQueueTests: XCTestCase
             print("Waiting for timeout")
             
             expectations.first(where: { $0.expectationDescription == executionDescription })?.fulfill()
+            
+            
         })
         
         self.wait(for: expectations,
@@ -195,10 +197,10 @@ class BackgroundQueueTests: XCTestCase
     func testMovingBetweenThreadsInAsyncOperation() {
         expectations.append(self.expectation(description: testMovingBetweenThreadsInAsyncOperationDescription))
         
-        let description1 = testMovingBetweenThreadsInAsyncOperationDescription + "_1"
-        let description2 = testMovingBetweenThreadsInAsyncOperationDescription + "_2"
-        let description3 = testMovingBetweenThreadsInAsyncOperationDescription + "_3"
-        let description4 = testMovingBetweenThreadsInAsyncOperationDescription + "_4"
+        let description1 = testMovingBetweenThreadsInAsyncOperationDescription + " _1"
+        let description2 = testMovingBetweenThreadsInAsyncOperationDescription + " _2"
+        let description3 = testMovingBetweenThreadsInAsyncOperationDescription + " _3"
+        let description4 = testMovingBetweenThreadsInAsyncOperationDescription + " _4"
         
         expectations.append(self.expectation(description: description1))
         expectations.append(self.expectation(description: description2))
@@ -288,6 +290,173 @@ class BackgroundQueueTests: XCTestCase
         self.wait(for: expectations,
                   timeout: 7)
     }
+    
+    let testCancellingAnOperationDescription = "Testing cancelling an AsyncOperation"
+    func testCancellingAnOperation() {
+        expectations.append(self.expectation(description: testCancellingAnOperationDescription + " _final"))
+        expectations.last!.isInverted = true
+        
+        let executionDescription = testCancellingAnOperationDescription + " _executed"
+        expectations.append(self.expectation(description: executionDescription))
+        
+        expectations.append(self.expectation(description: testCancellingAnOperationDescription + " _first"))
+        
+        //A timeout AsyncOperation
+        self.backgroundQueue.addOperation(AsyncOperation(timeout: 5) { (op) in
+            print("Executing Operation")
+            
+            expectations.first(where: { $0.expectationDescription == executionDescription })?.fulfill()
+        })
+        
+        Timer.scheduledTimer(withTimeInterval: 3,
+                             repeats: false)
+        { [weak self] (timer) in
+            timer.invalidate()
+            self?.backgroundQueue.cancelAllOperations()
+        }
+        
+        self.wait(for: expectations,
+                  timeout: 10)
+    }
+    
+    let testCancellingMultipleOperationsDescription = "Testing cancelling multiple AsyncOperations"
+    func testCancellingMultipleOperations() {
+        expectations.append(self.expectation(description: testCancellingMultipleOperationsDescription))
+        
+        let executionDescription1 = testCancellingMultipleOperationsDescription + " _executed1"
+        expectations.append(self.expectation(description: executionDescription1))
+        
+        let executionDescription2 = testCancellingMultipleOperationsDescription + " _executed2"
+        expectations.append(self.expectation(description: executionDescription2))
+        expectations.last!.isInverted = true
+        
+        //A timeout AsyncOperation
+        self.backgroundQueue.addSequentialOperations(
+            [
+            AsyncOperation(timeout: 5) { (op) in
+                print("Executing Operation 1")
+                
+                expectations.first(where: { $0.expectationDescription == executionDescription1 })?.fulfill()
+            },
+            AsyncOperation(timeout: 5) { (op) in
+                print("Executing Operation 2")
+                
+                expectations.first(where: { $0.expectationDescription == executionDescription2 })?.fulfill()
+            }
+            ], waitUntilFinished: false)
+        
+        Timer.scheduledTimer(withTimeInterval: 3,
+                             repeats: false)
+        { [weak self] (timer) in
+            timer.invalidate()
+            self?.backgroundQueue.cancelAllOperations()
+        }
+        
+        self.wait(for: expectations,
+                  timeout: 6)
+    }
+    
+    let testCancellingAnOperationBeforeItStartsDescription = "Testing cancelling an AsyncOperation before it starts"
+    func testCancellingAnOperationBeforeItStarts() {
+        expectations.append(self.expectation(description: testCancellingAnOperationBeforeItStartsDescription))
+        
+        let executionDescription = testCancellingAnOperationBeforeItStartsDescription + " _executed1"
+        expectations.append(self.expectation(description: executionDescription))
+        expectations.last!.isInverted = true
+        
+        self.backgroundQueue.isSuspended = true
+        
+        //A timeout AsyncOperation
+        self.backgroundQueue.addOperation(AsyncOperation(timeout: 5) { (op) in
+            print("Executing Operation")
+            
+            expectations.first(where: { $0.expectationDescription == executionDescription })?.fulfill()
+        })
+        
+        self.backgroundQueue.cancelAllOperations()
+        
+        Timer.scheduledTimer(withTimeInterval: 3,
+                             repeats: false)
+        { [weak self] (timer) in
+            timer.invalidate()
+            self?.backgroundQueue.isSuspended = false
+        }
+        
+        self.wait(for: expectations,
+                  timeout: 6)
+    }
+    
+    let testCancellingAnOperationShouldntWaitForTheTimeoutDescription = "Testing cancelling an AsyncOperation should't wait for its timeout"
+    func testCancellingAnOperationShouldntWaitForTheTimeout() {
+        expectations.append(self.expectation(description: testCancellingAnOperationShouldntWaitForTheTimeoutDescription + " _final"))
+        expectations.last!.isInverted = true
+        
+        let executionDescription = testCancellingAnOperationShouldntWaitForTheTimeoutDescription + " _executed"
+        expectations.append(self.expectation(description: executionDescription))
+        
+        expectations.append(self.expectation(description: testCancellingAnOperationShouldntWaitForTheTimeoutDescription + " _first"))
+        
+        //A timeout AsyncOperation
+        self.backgroundQueue.addOperation(AsyncOperation(timeout: 60) { (op) in
+            print("Executing Operation")
+            
+            expectations.first(where: { $0.expectationDescription == executionDescription })?.fulfill()
+        })
+        
+        Timer.scheduledTimer(withTimeInterval: 3,
+                             repeats: false)
+        { [weak self] (timer) in
+            timer.invalidate()
+            self?.backgroundQueue.cancelAllOperations()
+        }
+        
+        self.wait(for: expectations,
+                  timeout: 10)
+    }
+    
+    let testSequentialOperationShouldntStartBeforeDependencyHasFinishedDescription = "A sequential operation shoudn't start before its dependency has finished"
+    func testSequentialOperationShouldntStartBeforeDependencyHasFinished() {
+        expectations.append(self.expectation(description: testSequentialOperationShouldntStartBeforeDependencyHasFinishedDescription))
+        
+        let executionDescription1 = testSequentialOperationShouldntStartBeforeDependencyHasFinishedDescription + " _executed1"
+        expectations.append(self.expectation(description: executionDescription1))
+        
+        let executionDescription2 = testSequentialOperationShouldntStartBeforeDependencyHasFinishedDescription + " _not_executed2"
+        expectations.append(self.expectation(description: executionDescription2))
+        
+        var expectationNot2: XCTestExpectation? = self.expectation(description: testSequentialOperationShouldntStartBeforeDependencyHasFinishedDescription + " _not_executed2")
+        expectations.append(expectationNot2!)
+        expectationNot2!.isInverted = true
+        
+        Timer.scheduledTimer(withTimeInterval: 4.5,
+                             repeats: false)
+        { (timer) in
+            timer.invalidate()
+            expectationNot2 = nil
+        }
+        
+        //A timeout AsyncOperation
+        self.backgroundQueue.addSequentialOperations(
+            [
+                AsyncOperation(timeout: 5) { (op) in
+                    print("Executing Operation 1")
+                    
+                    expectations.first(where: { $0.expectationDescription == executionDescription1 })?.fulfill()
+                },
+                AsyncOperation { (op) in
+                    print("Executing Operation 2")
+                    
+                    expectations.first(where: { $0.expectationDescription == executionDescription2 })?.fulfill()
+                    
+                    expectationNot2?.fulfill()
+                    
+                    op.finish()
+                }
+            ], waitUntilFinished: false)
+        
+        self.wait(for: expectations,
+                  timeout: 10)
+    }
 }
 
 
@@ -313,6 +482,41 @@ extension BackgroundQueueTests: BackgroundQueueDelegate
         }
         
         if let expectation = expectations.first(where: { $0.expectationDescription == testMovingBetweenThreadsInAsyncOperationDescription }) {
+            expectation.fulfill()
+            return
+        }
+        
+        if let expectation = expectations.first(where: { $0.expectationDescription == testCancellingAnOperationDescription + " _first" }) {
+            expectation.fulfill()
+            return
+        }
+        
+        if let expectation = expectations.first(where: { $0.expectationDescription == testCancellingAnOperationDescription + " _final" }) {
+            expectation.fulfill()
+            return
+        }
+        
+        if let expectation = expectations.first(where: { $0.expectationDescription == testCancellingMultipleOperationsDescription }) {
+            expectation.fulfill()
+            return
+        }
+        
+        if let expectation = expectations.first(where: { $0.expectationDescription == testCancellingAnOperationBeforeItStartsDescription }) {
+            expectation.fulfill()
+            return
+        }
+        
+        if let expectation = expectations.first(where: { $0.expectationDescription == testCancellingAnOperationShouldntWaitForTheTimeoutDescription + " _first" }) {
+            expectation.fulfill()
+            return
+        }
+        
+        if let expectation = expectations.first(where: { $0.expectationDescription == testCancellingAnOperationShouldntWaitForTheTimeoutDescription + " _final" }) {
+            expectation.fulfill()
+            return
+        }
+        
+        if let expectation = expectations.first(where: { $0.expectationDescription == testSequentialOperationShouldntStartBeforeDependencyHasFinishedDescription }) {
             expectation.fulfill()
             return
         }
