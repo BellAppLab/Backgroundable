@@ -327,8 +327,9 @@ final class BackgroundQueue: OperationQueue
                 if new > 0 {
                     self.startBackgroundTask()
                 } else if new == 0 {
-                    self.endBackgroundTask()
-                    self.reportFinishToDelegate()
+                    self.reportFinishToDelegate { [weak self] in
+                        self?.endBackgroundTask()
+                    }
                 }
             }
             return
@@ -340,11 +341,18 @@ final class BackgroundQueue: OperationQueue
                            context: context)
     }
     
-    private func reportFinishToDelegate() {
+    private func reportFinishToDelegate(_ completion: @escaping () -> Void) {
         guard let delegate = self.delegate else { return }
-        onTheMainThread { [weak self] in
+        inTheGlobalQueue { [weak self] in
+            defer { completion() }
             guard let strongSelf = self else { return }
-            delegate.backgroundQueueDidFinishOperations(strongSelf)
+            guard UIApplication.shared.applicationState == .active else {
+                delegate.backgroundQueueDidFinishOperations(strongSelf)
+                return
+            }
+            onTheMainThread {
+                delegate.backgroundQueueDidFinishOperations(strongSelf)
+            }
         }
     }
 }
@@ -416,4 +424,15 @@ public func inTheBackground(_ closure: @escaping () -> Void)
 public func onTheMainThread(_ closure: @escaping () -> Void)
 {
     OperationQueue.main.addOperation(closure)
+}
+
+/**
+ The easiest way to excute code on the main thread.
+ 
+ - parameters:
+ - closure: The closure to be executed on the main thread.
+ */
+public func inTheGlobalQueue(_ closure: @escaping () -> Void)
+{
+    DispatchQueue.global().async(execute: closure)
 }
