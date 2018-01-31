@@ -330,12 +330,11 @@ final class AsyncOperation: Operation
     }
     
     override func start() {
-        guard !self.isCancelled else { return }
-        
         self.set(state: State(isExecuting: true))
         
         self.startTimeout()
         
+        guard !self.isCancelled else { return }
         unowned let weakSelf = self
         self.closure(weakSelf)
     }
@@ -351,7 +350,7 @@ final class AsyncOperation: Operation
     }
     
     override func cancel() {
-        guard self.isFinished == false else { return }
+        defer { super.cancel() }
         self.set(state: State(isCancelled: true))
     }
     
@@ -394,7 +393,7 @@ fileprivate extension AsyncOperation
     func startTimeout() {
         DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + self.timeout) { [weak self] in
             guard let strongSelf = self else { return }
-            strongSelf.cancel()
+            strongSelf.finish()
         }
     }
 }
