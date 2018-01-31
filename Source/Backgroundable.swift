@@ -1,6 +1,89 @@
 import UIKit
 
 
+//
+//  CwlMutex.swift
+//  CwlUtils
+//
+//  Created by Matt Gallagher on 2015/02/03.
+//  Copyright © 2015 Matt Gallagher ( http://cocoawithlove.com ). All rights reserved.
+//
+//  Permission to use, copy, modify, and/or distribute this software for any
+//  purpose with or without fee is hereby granted, provided that the above
+//  copyright notice and this permission notice appear in all copies.
+//
+//  THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+//  WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+//  MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+//  SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+//  WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+//  ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF OR
+//  IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+//
+#if os(Linux)
+    import Glibc
+#else
+    import Darwin
+#endif
+
+fileprivate final class PThreadMutex {
+    func sync<R>(execute work: () throws -> R) rethrows -> R {
+        unbalancedLock()
+        defer { unbalancedUnlock() }
+        return try work()
+    }
+    func trySync<R>(execute work: () throws -> R) rethrows -> R? {
+        guard unbalancedTryLock() else { return nil }
+        defer { unbalancedUnlock() }
+        return try work()
+    }
+    
+    typealias MutexPrimitive = pthread_mutex_t
+    
+    // Non-recursive "PTHREAD_MUTEX_NORMAL" and recursive "PTHREAD_MUTEX_RECURSIVE" mutex types.
+    enum PThreadMutexType {
+        case normal
+        case recursive
+    }
+    
+    var unsafeMutex = pthread_mutex_t()
+    
+    /// Default constructs as ".Normal" or ".Recursive" on request.
+    init(type: PThreadMutexType = .normal) {
+        var attr = pthread_mutexattr_t()
+        guard pthread_mutexattr_init(&attr) == 0 else {
+            preconditionFailure()
+        }
+        switch type {
+        case .normal:
+            pthread_mutexattr_settype(&attr, Int32(PTHREAD_MUTEX_NORMAL))
+        case .recursive:
+            pthread_mutexattr_settype(&attr, Int32(PTHREAD_MUTEX_RECURSIVE))
+        }
+        guard pthread_mutex_init(&unsafeMutex, &attr) == 0 else {
+            preconditionFailure()
+        }
+        pthread_mutexattr_destroy(&attr)
+    }
+    
+    deinit {
+        pthread_mutex_destroy(&unsafeMutex)
+    }
+    
+    func unbalancedLock() {
+        pthread_mutex_lock(&unsafeMutex)
+    }
+    
+    func unbalancedTryLock() -> Bool {
+        return pthread_mutex_trylock(&unsafeMutex) == 0
+    }
+    
+    func unbalancedUnlock() {
+        pthread_mutex_unlock(&unsafeMutex)
+    }
+}
+
+
 //MARK: - App States
 /**
  The AppStatesHandler protocol defines an interface for objects that want to receive `UIApplicationWillResignActive` and `UIApplicationDidBecomeActive` notifications.
@@ -205,36 +288,34 @@ final class AsyncOperation: Operation
     }
     
     override var isExecuting: Bool {
-        return self.state.isExecuting
+        return self.getState().isExecuting
     }
     
     override var isFinished: Bool {
-        return self.state.isFinished
+        return self.getState().isFinished
     }
     
     override var isCancelled: Bool {
-        return self.state.isCancelled
+        return self.getState().isCancelled
     }
     
     /**
      Custom flag used to emit KVO notifications regarding the `isExecuting` property.
      */
     private var _state = State()
-    private var state: State {
-        get {
-            return _state
-        }
-        set {
-            let oldValue = _state
-            DispatchQueue.global(qos: .background).async {  [weak self] in
-                let keys = oldValue.changedKeys(otherState: newValue)
-                keys.forEach {
-                    self?.willChangeValue(forKey: $0)
-                }
-                self?._state = newValue
-                keys.forEach {
-                    self?.didChangeValue(forKey: $0)
-                }
+    private func getState() -> State {
+        return PThreadMutex().sync(execute: { [weak self] in self?._state ?? State() })
+    }
+    private func set(state newValue: State) {
+        let oldValue = _state
+        DispatchQueue.global(qos: .background).async { [weak self] in
+            let keys = oldValue.changedKeys(otherState: newValue)
+            keys.forEach {
+                self?.willChangeValue(forKey: $0)
+            }
+            self?._state = newValue
+            keys.forEach {
+                self?.didChangeValue(forKey: $0)
             }
         }
     }
@@ -242,7 +323,7 @@ final class AsyncOperation: Operation
     override func start() {
         guard !self.isCancelled else { return }
         
-        self.state = State(isExecuting: true)
+        self.set(state: State(isExecuting: true))
         
         self.startTimeout()
         
@@ -257,12 +338,12 @@ final class AsyncOperation: Operation
      */
     func finish() {
         guard self.isCancelled == false else { return }
-        self.state = State(isFinished: true)
+        self.set(state: State(isFinished: true))
     }
     
     override func cancel() {
         guard self.isFinished == false else { return }
-        self.state = State(isCancelled: true)
+        self.set(state: State(isCancelled: true))
     }
     
     /// The closure to be executed by the operation.
@@ -346,23 +427,27 @@ final class BackgroundQueue: OperationQueue
     weak var delegate: BackgroundQueueDelegate?
     
     private func startBackgroundTask() {
-        guard self.backgroundTaskId == UIBackgroundTaskInvalid else { return }
-        
-        self.backgroundTaskId = UIApplication.shared.beginBackgroundTask { [weak self] in
-            self?.endBackgroundTask()
+        PThreadMutex().sync { [weak self] () -> Void in
+            guard self?.backgroundTaskId == UIBackgroundTaskInvalid else { return }
+            
+            self?.backgroundTaskId = UIApplication.shared.beginBackgroundTask {
+                self?.endBackgroundTask()
+            }
         }
     }
     
     private func endBackgroundTask() {
-        guard self.backgroundTaskId != UIBackgroundTaskInvalid else { return }
-        
-        //If iOS invalidates background tasks (because the we ran out of background time), we should cancel all existing operations here
-        if self.operationCount > 0 {
-            self.cancelAllOperations()
+        PThreadMutex().sync { [weak self] () -> Void in
+            guard let backgroundTaskId = self?.backgroundTaskId, backgroundTaskId != UIBackgroundTaskInvalid else { return }
+            
+            //If iOS invalidates background tasks (because the we ran out of background time), we should cancel all existing operations here
+            if self?.operationCount ?? 0 > 0 {
+                self?.cancelAllOperations()
+            }
+            
+            UIApplication.shared.endBackgroundTask(backgroundTaskId)
+            self?.backgroundTaskId = UIBackgroundTaskInvalid
         }
-        
-        UIApplication.shared.endBackgroundTask(self.backgroundTaskId)
-        self.backgroundTaskId = UIBackgroundTaskInvalid
     }
     
     deinit {
