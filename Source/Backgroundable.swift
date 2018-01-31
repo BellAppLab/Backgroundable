@@ -150,69 +150,100 @@ extension Visibility
  ## See Also:
  - `BackgroundQueue`
  */
+@objc
 final class AsyncOperation: Operation
 {
+    static let defaultTimeout: TimeInterval = 10
+    
+    private struct State {
+        let isExecuting: Bool
+        let isFinished: Bool
+        let isCancelled: Bool
+        
+        init(isExecuting: Bool = false,
+             isFinished: Bool = false,
+             isCancelled: Bool = false)
+        {
+            var isExecuting = isExecuting
+            var isFinished = isFinished
+            var isCancelled = isCancelled
+            
+            if isCancelled {
+                isFinished = true
+                isExecuting = false
+            } else if isFinished {
+                isCancelled = false
+                isExecuting = false
+            } else if isExecuting {
+                isCancelled = false
+                isFinished = false
+            }
+            
+            self.isExecuting = isExecuting
+            self.isFinished = isFinished
+            self.isCancelled = isCancelled
+        }
+        
+        func changedKeys(otherState: State) -> [String]
+        {
+            var keys = [String]()
+            
+            if self.isExecuting != otherState.isExecuting {
+                keys.append("isExecuting")
+            }
+            
+            if self.isFinished != otherState.isFinished {
+                keys.append("isFinished")
+            }
+            
+            if self.isCancelled != otherState.isCancelled {
+                keys.append("isCancelled")
+            }
+            
+            return keys
+        }
+    }
+    
     override var isExecuting: Bool {
-        return self.isWorking
+        return self.state.isExecuting
     }
     
     override var isFinished: Bool {
-        return self.isDone
+        return self.state.isFinished
+    }
+    
+    override var isCancelled: Bool {
+        return self.state.isCancelled
     }
     
     /**
      Custom flag used to emit KVO notifications regarding the `isExecuting` property.
      */
-    private var isWorking: Bool = false {
+    private var state = State() {
         willSet {
-            guard newValue != isWorking else { return }
-            self.willChangeValue(forKey: "isExecuting")
+            let keys = state.changedKeys(otherState: newValue)
+            DispatchQueue.global(qos: .background).sync {  [weak self] in
+                keys.forEach {
+                    self?.willChangeValue(forKey: $0)
+                }
+            }
         }
         didSet {
-            guard oldValue != isWorking else { return }
-            self.didChangeValue(forKey: "isExecuting")
-        }
-    }
-    
-    /**
-     Custom flag used to emit KVO notifications regarding the `isFinished` property.
-     */
-    fileprivate var isDone: Bool = false {
-        willSet {
-            guard newValue != isDone else { return }
-            self.willChangeValue(forKey: "isFinished")
-        }
-        didSet {
-            guard oldValue != isDone else { return }
-            self.didChangeValue(forKey: "isFinished")
+            let keys = state.changedKeys(otherState: oldValue)
+            DispatchQueue.global(qos: .background).sync {  [weak self] in
+                keys.forEach {
+                    self?.didChangeValue(forKey: $0)
+                }
+            }
         }
     }
     
     override func start() {
         guard !self.isCancelled else { return }
         
-        self.isWorking = true
+        self.state = State(isExecuting: true)
         
-        /**
-         If an operation never calls its `finish()` method, a Timer will fire and execute this method.
-         */
-        DispatchQueue.main.async { [weak self] in
-            guard let strongSelf = self else { return }
-            if #available(iOS 10.0, *) {
-                Timer.scheduledTimer(withTimeInterval: strongSelf.timeout,
-                                     repeats: false)
-                { (timer) in
-                    defer { timer.invalidate() }
-                    strongSelf.cancel()
-                }
-            } else {
-                Timer.scheduledTimer(timeInterval: strongSelf.timeout,
-                                     target: strongSelf,
-                                     selector: #selector(strongSelf.handleTimeoutTimer(_:)),
-                                     userInfo: nil,
-                                     repeats: false)
-            }
-        }
+        self.startTimeout()
         
         unowned let weakSelf = self
         self.closure(weakSelf)
@@ -224,14 +255,13 @@ final class AsyncOperation: Operation
      Calling this function sets the `isExecuting` property to `false` and `isFinished` property to `true`.
      */
     func finish() {
-        self.isDone = true
-        self.isWorking = false
+        guard self.isCancelled == false else { return }
+        self.state = State(isFinished: true)
     }
     
     override func cancel() {
-        guard !self.isFinished else { return }
-        super.cancel()
-        self.isWorking = false
+        guard self.isFinished == false else { return }
+        self.state = State(isCancelled: true)
     }
     
     /// The closure to be executed by the operation.
@@ -246,27 +276,53 @@ final class AsyncOperation: Operation
         - timeout: The time in seconds after which this operation should be marked as finished and removed from the queue. 
         - closure: The closure to be executed by the operation. The closure takes a `AsyncOperation` parameter. Call `finish()` on the object passed here.
      */
-    required init(timeout: TimeInterval = 10,
+    @nonobjc
+    required init(timeout: TimeInterval = AsyncOperation.defaultTimeout,
                   _ closure: @escaping (_ operation: AsyncOperation) -> Void)
     {
         self.closure = closure
-        self.timeout = timeout
+        self.timeout = timeout >= 0.0 ? timeout : AsyncOperation.defaultTimeout
         super.init()
+    }
+    
+    @objc
+    convenience init(timeout: TimeInterval,
+                     andBlock closure: @escaping (_ operation: AsyncOperation) -> Void)
+    {
+        self.init(timeout: timeout,
+                  closure)
     }
 }
 
-extension AsyncOperation
+@nonobjc
+fileprivate extension AsyncOperation
 {
-    @objc func handleTimeoutTimer(_ timer: Timer) {
-        defer { timer.invalidate() }
-        self.cancel()
+    /**
+     If an operation never calls its `finish()` method, this will cancel it.
+     */
+    func startTimeout() {
+        DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + self.timeout) { [weak self] in
+            guard let strongSelf = self else { return }
+            strongSelf.cancel()
+        }
     }
 }
 
 //MARK: Operation Queue
 private var backgroundQueueContext = 0
 
+/**
+ The `BackgroundQueueDelegate` receive reports from its `BackgroundQueue` of events happening with the queue.
+ */
 protocol BackgroundQueueDelegate: class {
+    /**
+     Called when the `BackgroundQueue` has become empty.
+     
+     - parameters:
+         - queue: The underlying `BackgroundQueue` whose operations have finished.
+     
+     - warning: This method is called in `DispatchQueue.global()`.
+     */
     func backgroundQueueDidFinishOperations(_ queue: BackgroundQueue)
 }
 
@@ -275,10 +331,17 @@ protocol BackgroundQueueDelegate: class {
  
  - note: These operations are guaranteed to be executed one after the other.
  */
+@objc
 final class BackgroundQueue: OperationQueue
 {
     private var backgroundTaskId = UIBackgroundTaskInvalid
     
+    /**
+     The BackgroundQueue's delegate.
+     
+     ## See Also:
+     `BackgroundQueueDelegate`
+     */
     weak var delegate: BackgroundQueueDelegate?
     
     private func startBackgroundTask() {
@@ -346,18 +409,13 @@ final class BackgroundQueue: OperationQueue
         inTheGlobalQueue { [weak self] in
             defer { completion() }
             guard let strongSelf = self else { return }
-            guard UIApplication.shared.applicationState == .active else {
-                delegate.backgroundQueueDidFinishOperations(strongSelf)
-                return
-            }
-            onTheMainThread {
-                delegate.backgroundQueueDidFinishOperations(strongSelf)
-            }
+            delegate.backgroundQueueDidFinishOperations(strongSelf)
         }
     }
 }
 
 
+@objc
 extension OperationQueue
 {
     /**
@@ -427,12 +485,12 @@ public func onTheMainThread(_ closure: @escaping () -> Void)
 }
 
 /**
- The easiest way to excute code on the main thread.
+ The easiest way to excute code in the global background queue.
  
  - parameters:
- - closure: The closure to be executed on the main thread.
+    - closure: The closure to be executed in the global background queue.
  */
 public func inTheGlobalQueue(_ closure: @escaping () -> Void)
 {
-    DispatchQueue.global().async(execute: closure)
+    DispatchQueue.global(qos: .background).async(execute: closure)
 }
