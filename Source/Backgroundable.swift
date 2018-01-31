@@ -302,21 +302,26 @@ final class AsyncOperation: Operation
     /**
      Custom flag used to emit KVO notifications regarding the `isExecuting` property.
      */
-    private var _state = State()
+    private var _state = PThreadMutex().sync { State() }
     private func getState() -> State {
-        return PThreadMutex().sync(execute: { [weak self] in self?._state ?? State() })
+        objc_sync_enter(self)
+        defer { objc_sync_exit(self) }
+        return self._state
     }
     private func set(state newValue: State) {
-        let oldValue = _state
-        DispatchQueue.global(qos: .background).async { [weak self] in
-            let keys = oldValue.changedKeys(otherState: newValue)
-            keys.forEach {
-                self?.willChangeValue(forKey: $0)
-            }
-            self?._state = newValue
-            keys.forEach {
-                self?.didChangeValue(forKey: $0)
-            }
+        objc_sync_enter(self)
+        defer { objc_sync_exit(self) }
+        
+        let oldValue = self._state
+        let strongSelf = self
+        
+        let keys = oldValue.changedKeys(otherState: newValue)
+        keys.forEach {
+            strongSelf.willChangeValue(forKey: $0)
+        }
+        self._state = newValue
+        keys.forEach {
+            strongSelf.didChangeValue(forKey: $0)
         }
     }
     
