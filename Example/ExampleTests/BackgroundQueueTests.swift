@@ -14,10 +14,13 @@ var expectations: [XCTestExpectation] = []
 
 class BackgroundQueueTests: XCTestCase
 {
+    var backgroundQueue: BackgroundQueue!
+    
     override func setUp() {
         super.setUp()
         
-        OperationQueue.background.delegate = self
+        self.backgroundQueue = BackgroundQueue()
+        self.backgroundQueue.delegate = self
     }
     
     override func tearDown() {
@@ -71,7 +74,7 @@ class BackgroundQueueTests: XCTestCase
             print("Operation executed in the background!")
             operation.finish()
         }
-        OperationQueue.background.addOperation(op)
+        self.backgroundQueue.addOperation(op)
         
         self.wait(for: expectations,
                   timeout: 10)
@@ -163,8 +166,8 @@ class BackgroundQueueTests: XCTestCase
         
         expectations.append(self.expectation(description: testSequentialOperationsInTheBackgroundDescription))
         
-        OperationQueue.background.addSequentialOperations(sequentialOperations,
-                                                          waitUntilFinished: false)
+        self.backgroundQueue.addSequentialOperations(sequentialOperations,
+                                                     waitUntilFinished: false)
         
         self.wait(for: expectations,
                   timeout: 20)
@@ -178,7 +181,7 @@ class BackgroundQueueTests: XCTestCase
         expectations.append(self.expectation(description: executionDescription))
         
         //A timeout AsyncOperation
-        OperationQueue.background.addOperation(AsyncOperation(timeout: 2) { (op) in
+        self.backgroundQueue.addOperation(AsyncOperation(timeout: 2) { (op) in
             print("Waiting for timeout")
             
             expectations.first(where: { $0.expectationDescription == executionDescription })?.fulfill()
@@ -196,6 +199,11 @@ class BackgroundQueueTests: XCTestCase
         let description2 = testMovingBetweenThreadsInAsyncOperationDescription + "_2"
         let description3 = testMovingBetweenThreadsInAsyncOperationDescription + "_3"
         let description4 = testMovingBetweenThreadsInAsyncOperationDescription + "_4"
+        
+        expectations.append(self.expectation(description: description1))
+        expectations.append(self.expectation(description: description2))
+        expectations.append(self.expectation(description: description3))
+        expectations.append(self.expectation(description: description4))
         
         var hasFulfilled1 = false
         var hasFulfilled2 = false
@@ -274,13 +282,8 @@ class BackgroundQueueTests: XCTestCase
             op.finish()
         })
         
-        expectations.append(self.expectation(description: description1))
-        expectations.append(self.expectation(description: description2))
-        expectations.append(self.expectation(description: description3))
-        expectations.append(self.expectation(description: description4))
-        
-        OperationQueue.background.addSequentialOperations(sequentialOperations,
-                                                          waitUntilFinished: false)
+        self.backgroundQueue.addSequentialOperations(sequentialOperations,
+                                                     waitUntilFinished: false)
         
         self.wait(for: expectations,
                   timeout: 7)
@@ -292,6 +295,8 @@ extension BackgroundQueueTests: BackgroundQueueDelegate
 {
     func backgroundQueueDidFinishOperations(_ queue: BackgroundQueue)
     {
+        guard queue == self.backgroundQueue else { return }
+        
         if let expectation = expectations.first(where: { $0.expectationDescription == testAsyncOperationInTheBackgroundDescription }) {
             expectation.fulfill()
             return
