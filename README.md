@@ -44,6 +44,22 @@ onTheMainThread {
 }
 ```
 
+And transform this:
+
+```swift
+DispatchQueue.global().async {
+//do something in the global queue
+}
+```
+
+**Into this**:
+
+```swift
+inTheGlobalQueue {
+//you're back in the global queue
+}
+```
+
 ## Operations
 
 Backgroundable exposes a nifty way to enqueue several operations that should be executed sequentially:
