@@ -221,17 +221,17 @@ final class AsyncOperation: Operation
      */
     private var state = State() {
         willSet {
-            let keys = state.changedKeys(otherState: newValue)
+            let oldValue = state
             DispatchQueue.global(qos: .background).sync {  [weak self] in
-                keys.forEach {
+                oldValue.changedKeys(otherState: newValue).forEach {
                     self?.willChangeValue(forKey: $0)
                 }
             }
         }
         didSet {
-            let keys = state.changedKeys(otherState: oldValue)
+            let newValue = state
             DispatchQueue.global(qos: .background).sync {  [weak self] in
-                keys.forEach {
+                newValue.changedKeys(otherState: oldValue).forEach {
                     self?.didChangeValue(forKey: $0)
                 }
             }
