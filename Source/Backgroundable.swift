@@ -219,19 +219,20 @@ final class AsyncOperation: Operation
     /**
      Custom flag used to emit KVO notifications regarding the `isExecuting` property.
      */
-    private var state = State() {
-        willSet {
-            let oldValue = state
-            DispatchQueue.global(qos: .background).sync {  [weak self] in
-                oldValue.changedKeys(otherState: newValue).forEach {
+    private var _state = State()
+    private var state: State {
+        get {
+            return _state
+        }
+        set {
+            let oldValue = _state
+            DispatchQueue.global(qos: .background).async {  [weak self] in
+                let keys = oldValue.changedKeys(otherState: newValue)
+                keys.forEach {
                     self?.willChangeValue(forKey: $0)
                 }
-            }
-        }
-        didSet {
-            let newValue = state
-            DispatchQueue.global(qos: .background).sync {  [weak self] in
-                newValue.changedKeys(otherState: oldValue).forEach {
+                self?._state = newValue
+                keys.forEach {
                     self?.didChangeValue(forKey: $0)
                 }
             }
@@ -405,7 +406,7 @@ final class BackgroundQueue: OperationQueue
     }
     
     private func reportFinishToDelegate(_ completion: @escaping () -> Void) {
-        guard let delegate = self.delegate else { return }
+        guard let delegate = self.delegate else { completion(); return }
         inTheGlobalQueue { [weak self] in
             defer { completion() }
             guard let strongSelf = self else { return }
