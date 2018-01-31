@@ -421,7 +421,7 @@ protocol BackgroundQueueDelegate: class {
 @objc
 final class BackgroundQueue: OperationQueue
 {
-    private var backgroundTaskId = UIBackgroundTaskInvalid
+    private var backgroundTaskId = PThreadMutex().sync { UIBackgroundTaskInvalid }
     
     /**
      The BackgroundQueue's delegate.
@@ -432,27 +432,31 @@ final class BackgroundQueue: OperationQueue
     weak var delegate: BackgroundQueueDelegate?
     
     private func startBackgroundTask() {
-        PThreadMutex().sync { [weak self] () -> Void in
-            guard self?.backgroundTaskId == UIBackgroundTaskInvalid else { return }
-            
-            self?.backgroundTaskId = UIApplication.shared.beginBackgroundTask {
+        objc_sync_enter(self)
+        defer { objc_sync_exit(self) }
+        
+        guard self.backgroundTaskId == UIBackgroundTaskInvalid else { return }
+        
+        self.backgroundTaskId = UIApplication.shared.beginBackgroundTask { [weak self] in
+            inTheGlobalQueue {
                 self?.endBackgroundTask()
             }
         }
     }
     
     private func endBackgroundTask() {
-        PThreadMutex().sync { [weak self] () -> Void in
-            guard let backgroundTaskId = self?.backgroundTaskId, backgroundTaskId != UIBackgroundTaskInvalid else { return }
-            
-            //If iOS invalidates background tasks (because the we ran out of background time), we should cancel all existing operations here
-            if self?.operationCount ?? 0 > 0 {
-                self?.cancelAllOperations()
-            }
-            
-            UIApplication.shared.endBackgroundTask(backgroundTaskId)
-            self?.backgroundTaskId = UIBackgroundTaskInvalid
+        objc_sync_enter(self)
+        defer { objc_sync_exit(self) }
+        
+        guard self.backgroundTaskId != UIBackgroundTaskInvalid else { return }
+        
+        //If iOS invalidates background tasks (because the we ran out of background time), we should cancel all existing operations here
+        if self.operationCount > 0 {
+            self.cancelAllOperations()
         }
+        
+        UIApplication.shared.endBackgroundTask(backgroundTaskId)
+        self.backgroundTaskId = UIBackgroundTaskInvalid
     }
     
     deinit {
@@ -496,10 +500,13 @@ final class BackgroundQueue: OperationQueue
     }
     
     private func reportFinishToDelegate(_ completion: @escaping () -> Void) {
-        guard let delegate = self.delegate else { completion(); return }
+        objc_sync_enter(self)
+        defer { objc_sync_exit(self) }
+        
+        let strongSelf = self
+        guard let delegate = strongSelf.delegate else { completion(); return }
         inTheGlobalQueue { [weak self] in
             defer { completion() }
-            guard let strongSelf = self else { return }
             delegate.backgroundQueueDidFinishOperations(strongSelf)
         }
     }
