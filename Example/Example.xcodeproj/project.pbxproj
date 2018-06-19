@@ -153,7 +153,6 @@
 		6553C3B220D9493A00405D40 /* Backgroundable.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Backgroundable.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6553C3B420D9493A00405D40 /* Backgroundable_iOS.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Backgroundable_iOS.h; sourceTree = "<group>"; };
 		6553C3B520D9493A00405D40 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		655AA88C20D959CD008A28B8 /* push.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = push.sh; sourceTree = "<group>"; };
 		658231C420D7F8DC00FA8CC9 /* iOS Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "iOS Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		658231C620D7F8DD00FA8CC9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		658231C820D7F8DD00FA8CC9 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -260,7 +259,6 @@
 				658231EF20D7FDE600FA8CC9 /* Package.swift */,
 				650B58BC1DA6B8380037CBD7 /* README.md */,
 				6582329220D823F100FA8CC9 /* Backgroundable.podspec */,
-				655AA88B20D959CD008A28B8 /* Scripts */,
 				6582321620D8017200FA8CC9 /* Sources */,
 				658231C520D7F8DD00FA8CC9 /* iOS Example */,
 				6582324D20D812A200FA8CC9 /* iOS Tests */,
@@ -337,15 +335,6 @@
 				6553C3B520D9493A00405D40 /* Info.plist */,
 			);
 			path = Backgroundable_iOS;
-			sourceTree = "<group>";
-		};
-		655AA88B20D959CD008A28B8 /* Scripts */ = {
-			isa = PBXGroup;
-			children = (
-				655AA88C20D959CD008A28B8 /* push.sh */,
-			);
-			name = Scripts;
-			path = ../Scripts;
 			sourceTree = "<group>";
 		};
 		658231C520D7F8DD00FA8CC9 /* iOS Example */ = {
