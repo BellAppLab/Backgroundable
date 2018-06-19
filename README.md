@@ -4,7 +4,7 @@
 
 [![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%tvOS%20%7C%20Linux.svg?colorA=brightgreen)](#installation)
 
-[![Swift support](https://img.shields.io/badge/Swift-3.3%20%7C%204.1-red.svg?colorB=4E4E4E)](#swift-versions-support)
+[![Swift support](https://img.shields.io/badge/Swift-3.3%20%7C%204.1.svg?colorA=red)](#swift-versions-support)
 [![CocoaPods Compatible](https://img.shields.io/cocoapods/v/Backgroundable.svg?style=flat&label=CocoaPods&colorA=28a745&&colorB=4E4E4E)](https://cocoapods.org/pods/Backgroundable)
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-brightgreen.svg?style=flat&colorA=28a745&&colorB=4E4E4E)](https://github.com/Carthage/Carthage)
 [![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg?style=flat&colorA=28a745&&colorB=4E4E4E)](https://github.com/apple/swift-package-manager)
