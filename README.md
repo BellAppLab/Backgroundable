@@ -183,13 +183,13 @@ pod 'Backgroundable', '~> 1.0'
 
 ### Carthage
 
-```
+```swift
 github "BellAppLab/Backgroundable" ~> 1.0
 ```
 
 ### Swift Package Manager
 
-```
+```swift
 dependencies: [
     .package(url: "https://github.com/BellAppLab/Backgroundable", from: "1.0.0")
 ]
@@ -197,7 +197,7 @@ dependencies: [
 
 ### Git Submodules
 
-```
+```shell
 cd toYourProjectsFolder
 git submodule add -b submodule --name Backgroundable https://github.com/BellAppLab/Backgroundable.git
 ```
@@ -207,6 +207,10 @@ Then drag the `Backgroundable` folder into your Xcode project.
 ## Author
 
 Bell App Lab, apps@bellapplab.com
+
+### Credits
+
+[Logo image](https://thenounproject.com/search/?q=flow&i=1469609#) by [Becris](https://thenounproject.com/Becris) from [The Noun Project](https://thenounproject.com/)
 
 ## License
 
