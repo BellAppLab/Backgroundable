@@ -1,13 +1,13 @@
-# Backgroundable [![Version](https://img.shields.io/badge/Version-1.0.svg?style=flat&colorB=black)](#installation) [![License](https://img.shields.io/cocoapods/l/Backgroundable.svg?style=flat&colorB=black)](#license)
+# Backgroundable [![Version](https://img.shields.io/badge/Version-1.0.svg?style=flat)](#installation) [![License](https://img.shields.io/cocoapods/l/Backgroundable.svg?style=flat)](#license)
 
 <p align="center">
 
-[![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%tvOS%20%7C%20Linux.svg?style=flat&colorA=brightgreen)](#installation)
+[![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%tvOS%20%7C%20Linux.svg?style=flat)](#installation)
 
-[![Swift support](https://img.shields.io/badge/Swift-3.3%20%7C%204.1.svg?style=flat&colorA=red)](#swift-versions-support)
-[![CocoaPods Compatible](https://img.shields.io/cocoapods/v/Backgroundable.svg?style=flat&label=CocoaPods&colorA=brightgreen)](https://cocoapods.org/pods/Backgroundable)
-[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-brightgreen.svg?style=flat&colorA=brightgreen)](https://github.com/Carthage/Carthage)
-[![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible.svg?style=flat&colorA=brightgreen)](https://github.com/apple/swift-package-manager)
+[![Swift support](https://img.shields.io/badge/Swift-3.3%20%7C%204.1.svg?style=flat)](#swift-versions-support)
+[![CocoaPods Compatible](https://img.shields.io/cocoapods/v/Backgroundable.svg?style=flat&label=CocoaPods)](https://cocoapods.org/pods/Backgroundable)
+[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-brightgreen.svg?style=flat)](https://github.com/Carthage/Carthage)
+[![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible.svg?style=flat)](https://github.com/apple/swift-package-manager)
 
 [![Twitter](https://img.shields.io/badge/Twitter-@BellAppLab-blue.svg?style=flat)](http://twitter.com/BellAppLab)
 </p>
