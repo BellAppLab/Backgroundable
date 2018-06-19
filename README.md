@@ -1,8 +1,8 @@
-# Backgroundable [![Version](https://img.shields.io/badge/Version-1.0-4E4E4E.svg?colorA=lightgrey)](#installation)
+# Backgroundable [![Version](https://img.shields.io/badge/Version-1.0-4E4E4E.svg?colorA=lightgrey)](#installation) [![License](https://img.shields.io/cocoapods/l/Backgroundable.svg)](#license)
 
 <p align="center">
 
-[![Platform](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%tvOS%20%7C%20Linux-4E4E4E.svg?colorA=28a745)](#installation)
+[![Platforms](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%tvOS%20%7C%20Linux.svg?colorA=brightgreen)](#installation)
 
 [![Swift support](https://img.shields.io/badge/Swift-3.3%20%7C%204.1-red.svg?colorB=4E4E4E)](#swift-versions-support)
 [![CocoaPods Compatible](https://img.shields.io/cocoapods/v/Backgroundable.svg?style=flat&label=CocoaPods&colorA=28a745&&colorB=4E4E4E)](https://cocoapods.org/pods/Backgroundable)
