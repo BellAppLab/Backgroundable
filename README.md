@@ -1,8 +1,29 @@
-# Backgroundable
+# Backgroundable [![Version](https://img.shields.io/badge/Version-1.0-4E4E4E.svg?colorA=lightgrey)](#installation)
 
-A collection of handy classes, extensions and global functions to handle being in the background on iOS using Swift.
+<p align="center">
+[![Platform](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%tvOS%20%7C%20Linux-4E4E4E.svg?colorA=28a745)](#installation)
 
-_v0.8.2_
+[![Swift support](https://img.shields.io/badge/Swift-3.3%20%7C%204.1-lightgrey.svg?colorA=red&colorB=4E4E4E)](#swift-versions-support)
+[![CocoaPods Compatible](https://img.shields.io/cocoapods/v/Backgroundable.svg?style=flat&label=CocoaPods&colorA=28a745&&colorB=4E4E4E)](https://cocoapods.org/pods/Backgroundable)
+[![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-brightgreen.svg?style=flat&colorA=28a745&&colorB=4E4E4E)](https://github.com/Carthage/Carthage)
+[![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg?style=flat&colorA=28a745&&colorB=4E4E4E)](https://github.com/apple/swift-package-manager)
+
+[![Twitter](https://img.shields.io/badge/Twitter-@BellAppLab-blue.svg?style=flat)](http://twitter.com/BellAppLab)
+</p>
+
+Backgroundable is a collection of handy classes, extensions and global functions to handle being in the background using Swift.
+
+It's main focus is to add functionalities to existing `Operation`s and `OperationQueue`s, without adding overheads to the runtime (aka it's fast) nor to the developer (aka there's very little to learn).
+
+It's powerful because it's simple.
+
+## Specs
+
+* iOS 9+
+* tvOS 9+
+* macOS 10.11+
+* Swift 3.3+
+* Objective-C ready
 
 ## Executing Code in the Background
 
@@ -27,40 +48,8 @@ inTheBackground {
     //move to the background and get on with your life
 }
 ```
-    
-And transform this:
 
-```swift
-DispatchQueue.main.async {
-    //do something on the main thread
-}
-```
-    
-**Into this**:
-
-```swift
-onTheMainThread {
-    //you're back to the main thread
-}
-```
-
-And transform this:
-
-```swift
-DispatchQueue.global().async {
-//do something in the global queue
-}
-```
-
-**Into this**:
-
-```swift
-inTheGlobalQueue {
-//you're back in the global queue
-}
-```
-
-## Operations
+## Operation Queues
 
 Backgroundable exposes a nifty way to enqueue several operations that should be executed sequentially:
 
@@ -81,6 +70,8 @@ sequentialOperations.append(BlockOperation({ (op) in
 OperationQueue.background.addSequentialOperations(sequentialOperations, waitUntilFinished: false)
 ```
 
+### Background Queue
+
 Backgroundable also provides a global background operation queue (similar to the existing `OperationQueue.main`):
 
 ```swift
@@ -91,9 +82,15 @@ OperationQueue.background.addOperation {
 
 This background queue is an instance of the `BackgroundQueue` class, which automatically handles background task identifiers. Whenever an operation is enqueued, a background task identifier is generated and whenever the queue is empty, the queue automatically invalidates it. 
 
-These operations are guaranteed to be executed one after the other.
+Sequential operations are guaranteed to be executed one after the other.
 
-### Asyncronous Operations
+### Background Queue Delegate
+
+The `BackgroundQueue` class accepts a `BackgroundQueueDelegate`, which is notified whenever the queue `backgroundQueueWillStartOperations(_:)` and when `backgroundQueueDidFinishOperations(_:)`. 
+
+This is quite handy if you want to show the network activity indicator or save a database or anything else really. The sky is the limit!
+
+## Asyncronous Operations
 
 An `AsyncOperation` is an easy way to perform asynchronous tasks in an `OperationQueue`. It's designed to make it easy to perform long-running tasks on an operation queue regardless of how many times its task needs to jump between threads. Only once everything is done, the `AsyncOperation` is removed from the queue. 
 
@@ -108,31 +105,31 @@ self.loadThingsFromTheInternet(callback: { (result, error) in
 If we wrapped this in an `Operation` object, we would have one small problem:
 
 ```swift
-operationQueue.addOperation(BlockOperation({
+operationQueue.addOperation(BlockOperation({ [weak self] in
     //We're on a background thread now; NICE!
-    self.loadThingsFromTheInternet(callback: { (result, error) in
+    self?.loadThingsFromTheInternet(callback: { (result, error) in
         //process the result
-        //god knows in which thread this function returns... 
-        //BTW, where's the BlockOperation?
+        //who knows in which thread this function returns... 
     })
-    //But wait... As soon as we call this function, the operation will already be finished and removed from the queue
-    //We haven't finished what we wanted to do!
+    //Aaaand... As soon as we call the load function, the operation will already be finished and removed from the queue
+    //But we haven't finished what we wanted to do!
     //And the queue will now start executing its next operation!
+    //Sigh...
 }))
 ```
 
 The `AsyncOperation` class solves this issue by exposing the operation object itself to its execution block and only changing its `isFinished` property once everything is done:
 
 ```swift
-operationQueue.addOperation(AsyncOperation({ (op) in
+operationQueue.addOperation(AsyncOperation({ [weak self] (op) in
     //We're on a background thread now; NICE!
-    self.loadThingsFromTheInternet(callback: { (result, error) in
+    self?.loadThingsFromTheInternet(callback: { (result, error) in
         //process the result
         //then move to the main thread
         onTheMainThread {
-            //go to the main thread
+            //go to the background
             inTheBackground {
-                //do more stuff in the background again
+                //do more stuff 
                 //once everything is done, finish
                 op.finish()
                 //only now the queue will start working on the next thing
@@ -144,144 +141,48 @@ operationQueue.addOperation(AsyncOperation({ (op) in
 
 Nice, huh?
 
-## Visibility and App States
+### Timeouts
+
+There's no way for an `AsyncOperation` to know when it's done (hence, we need to call `op.finish()` when its work is done). But sometimes, we developers - ahem - forget things. 
+
+Thus, in order to cover for the case where `op.finish()` may never be called (consequently blocking the `OperationQueue`), `AsyncOperation`s come with a timeout (**defaulting to 10 seconds**). After the timeout elapses, the operation is automaticallt finished and removed from the queue. 
+
+It may be the case that your `AsyncOperation`'s workload takes longer than the default timeout. If that's the case, you can define a new timeout like this:
+
+```swift
+AsyncOperation(timeout: 20, { (op) in
+    //perform very long task
+    op.finish()
+})
+```
+
+### Cancelations
+
+As per [Apple's documentation](https://developer.apple.com/documentation/foundation/operation/1408418-iscancelled), it's always a good idea to check if your operation has been cancelled during the execution of its closure and shortcircuit it prematurely if needed. For example:
+
+```swift
+AsyncOperation({ (op) in 
+    //do some work
     
-Transform this: 
-
-```swift
-class ViewController: UIViewController {
-
-    deinit {
-        NotificationCenter.default.removeObserver(self)
-    }
-        
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        NotificationCenter.default.addObserver(self, selector: #selector(handleBackgroundNotification(_:)), name: .UIApplicationWillResignActiveNotification, object: nil)
-    }
+    guard !op.isCancelled else { return } //No need to call finish() in this case
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        /*
-            do something when the view appears,
-            but wait...
-        */
-    }
-        
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-            
-        /*
-            do something when the view disappears,
-            but wait...
-        */
-    }
-        
-    func handleBackgroundNotification(_ notification: Notification) {
-        /*
-            say the user presses the home button
-            now that viewWillDisappear method will never be called and you won't be able to undo the things you wanted...
-        */
-    }
-}
+    //do some more work
+})
 ```
-
-**Into this**:
-
-```swift
-class ViewController: UIViewController, Visibility {
-
-    open func willChangeVisibility() {
-        //NO NEED TO CALL SUPER!
-            
-        if !self.isVisible { //we're becoming visible, either from navigation or from the app being launched
-            // \o/
-        } else { //we're becoming invisible
-            
-        }
-    }
-        
-    open func didChangeVisibility() {
-        if self.isVisible { //we're visible
-            // \o/
-        } else { //we're invisible
-            
-        }
-    }
-}
-```
-
-**NOTE: ** In order to get this ease of use, please make your `UIViewController` subclass conform to the `Visibility` protocol and implement the following methods:
-
-```swift
-deinit {
-    self.resignAppStatesHandler()
-}
-
-//Visibility
-var appStateNotifications: [NSObjectProtocol] = []
-
-public var visible = false
-
-open func willChangeVisibility() {
-
-}
-
-open func didChangeVisibility() {
-
-}
-
-//View Controller Life Cycle
-override open func viewDidLoad()
-{
-    super.viewDidLoad()
-
-    self.becomeAppStatesHandler()
-}
-
-override open func viewWillAppear(_ animated: Bool)
-{
-    super.viewWillAppear(animated)
-
-    self.willChangeVisibility()
-    self.isVisible = true
-}
-
-override open func viewDidAppear(_ animated: Bool)
-{
-    super.viewDidAppear(animated)
-
-    self.didChangeVisibility()
-}
-
-override open func viewWillDisappear(_ animated: Bool)
-{
-    self.willChangeVisibility()
-    self.isVisible = false
-
-    super.viewWillDisappear(animated)
-}
-
-override open func viewDidDisappear(_ animated: Bool)
-{
-    self.didChangeVisibility()
-
-    super.viewDidDisappear(animated)
-}
-```
-
-## Requirements
-
-* iOS 8+
-* Swift 3.2+
 
 ## Installation
 
 ### Cocoapods
 
 Because of [this](http://stackoverflow.com/questions/39637123/cocoapods-app-xcworkspace-does-not-exists), I've dropped support for Cocoapods on this repo. I cannot have production code rely on a dependency manager that breaks this badly. 
+
+### Swift Package Manager
+
+```
+dependencies: [
+    .package(url: "https://github.com/BellAppLab/Backgroundable", from: "1.0.0")
+]
+```
 
 ### Git Submodules
 
@@ -300,12 +201,6 @@ git submodule add -b submodule --name Backgroundable https://github.com/BellAppL
 
 ```
 git submodule add -b swift3 --name Backgroundable https://github.com/BellAppLab/Backgroundable.git
-```
-
-**Swift 2 support**
-
-```
-git submodule add -b swift2 --name Backgroundable https://github.com/BellAppLab/Backgroundable.git
 ```
 
 Then, navigate to the new Backgroundable folder and drag the `Source` folder into your Xcode project.
