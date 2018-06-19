@@ -1,4 +1,4 @@
-# Backgroundable [![Version](https://img.shields.io/badge/Version-1.0-4E4E4E.svg?colorA=lightgrey)](#installation) [![License](https://img.shields.io/cocoapods/l/Backgroundable.svg)](#license)
+# Backgroundable [![Version](https://img.shields.io/badge/Version-1.0.svg?colorB=black)](#installation) [![License](https://img.shields.io/cocoapods/l/Backgroundable.svg?colorB=black)](#license)
 
 <p align="center">
 
