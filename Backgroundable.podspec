@@ -33,6 +33,4 @@ It's powerful because it's simple.
   s.ios.framework       = "UIKit"
   s.tvos.framework      = "UIKit"
 
-  s.swift_version       = "4.1"
-
 end

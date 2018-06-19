@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "6553C38320D9471800405D40"
-               BuildableName = "Backgroundable_macOS.framework"
+               BuildableName = "Backgroundable.framework"
                BlueprintName = "Backgroundable_macOS"
                ReferencedContainer = "container:Example.xcodeproj">
             </BuildableReference>
@@ -46,7 +46,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6553C38320D9471800405D40"
-            BuildableName = "Backgroundable_macOS.framework"
+            BuildableName = "Backgroundable.framework"
             BlueprintName = "Backgroundable_macOS"
             ReferencedContainer = "container:Example.xcodeproj">
          </BuildableReference>
@@ -64,7 +64,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "6553C38320D9471800405D40"
-            BuildableName = "Backgroundable_macOS.framework"
+            BuildableName = "Backgroundable.framework"
             BlueprintName = "Backgroundable_macOS"
             ReferencedContainer = "container:Example.xcodeproj">
          </BuildableReference>

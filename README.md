@@ -1,9 +1,10 @@
 # Backgroundable [![Version](https://img.shields.io/badge/Version-1.0-4E4E4E.svg?colorA=lightgrey)](#installation)
 
 <p align="center">
+
 [![Platform](https://img.shields.io/badge/Platforms-iOS%20%7C%20macOS%20%7C%tvOS%20%7C%20Linux-4E4E4E.svg?colorA=28a745)](#installation)
 
-[![Swift support](https://img.shields.io/badge/Swift-3.3%20%7C%204.1-lightgrey.svg?colorA=red&colorB=4E4E4E)](#swift-versions-support)
+[![Swift support](https://img.shields.io/badge/Swift-3.3%20%7C%204.1-red.svg?colorB=4E4E4E)](#swift-versions-support)
 [![CocoaPods Compatible](https://img.shields.io/cocoapods/v/Backgroundable.svg?style=flat&label=CocoaPods&colorA=28a745&&colorB=4E4E4E)](https://cocoapods.org/pods/Backgroundable)
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-brightgreen.svg?style=flat&colorA=28a745&&colorB=4E4E4E)](https://github.com/Carthage/Carthage)
 [![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-brightgreen.svg?style=flat&colorA=28a745&&colorB=4E4E4E)](https://github.com/apple/swift-package-manager)
@@ -174,9 +175,17 @@ AsyncOperation({ (op) in
 
 ### Cocoapods
 
-Because of [this](http://stackoverflow.com/questions/39637123/cocoapods-app-xcworkspace-does-not-exists), I've dropped support for Cocoapods on this repo. I cannot have production code rely on a dependency manager that breaks this badly. 
+```ruby
+pod 'Backgroundable', '~> 1.0'
+```
 
-### Swift Package Manager
+### Carthage
+
+```
+github "BellAppLab/Backgroundable" ~> 1.0
+```
+
+### Swift Package Manager
 
 ```
 dependencies: [
@@ -186,24 +195,12 @@ dependencies: [
 
 ### Git Submodules
 
-**Why submodules, you ask?**
-
-Following [this thread](http://stackoverflow.com/questions/31080284/adding-several-pods-increases-ios-app-launch-time-by-10-seconds#31573908) and other similar to it, and given that Cocoapods only works with Swift by adding the use_frameworks! directive, there's a strong case for not bloating the app up with too many frameworks. Although git submodules are a bit trickier to work with, the burden of adding dependencies should weigh on the developer, not on the user. :wink:
-
-To install Backgroundable using git submodules:
-
 ```
 cd toYourProjectsFolder
 git submodule add -b submodule --name Backgroundable https://github.com/BellAppLab/Backgroundable.git
 ```
 
-**Swift 3 support**
-
-```
-git submodule add -b swift3 --name Backgroundable https://github.com/BellAppLab/Backgroundable.git
-```
-
-Then, navigate to the new Backgroundable folder and drag the `Source` folder into your Xcode project.
+Then drag the `Backgroundable` folder into your Xcode project.
 
 ## Author
 
