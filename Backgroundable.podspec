@@ -3,6 +3,7 @@ Pod::Spec.new do |s|
   s.name                = "Backgroundable"
   s.version             = "1.0.0"
   s.summary             = "A collection of handy classes, extensions and global functions to handle being in the background using Swift."
+  s.screenshot          = "https://github.com/BellAppLab/Backgroundable/raw/master/Images/backgroundable.png"
 
   s.description         = <<-DESC
 Backgroundable is a collection of handy classes, extensions and global functions to handle being in the background using Swift.

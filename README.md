@@ -11,7 +11,7 @@
 
 [![Twitter](https://img.shields.io/badge/Twitter-@BellAppLab-blue.svg?style=flat)](http://twitter.com/BellAppLab)
 
-[alt text](./Images/backgroundable.png "Backgroundable")
+![Backgroundable](./Images/backgroundable.png)
 </p>
 
 Backgroundable is a collection of handy classes, extensions and global functions to handle being in the background using Swift.
