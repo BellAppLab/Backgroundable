@@ -176,11 +176,15 @@ AsyncOperation({ (op) in
 pod 'Backgroundable', '~> 1.0'
 ```
 
+Then `import Backgroundable` where needed.
+
 ### Carthage
 
 ```swift
 github "BellAppLab/Backgroundable" ~> 1.0
 ```
+
+Then `import Backgroundable` where needed.
 
 ### Swift Package Manager
 
@@ -189,6 +193,8 @@ dependencies: [
     .package(url: "https://github.com/BellAppLab/Backgroundable", from: "1.0.1")
 ]
 ```
+
+Then `import Backgroundable` where needed.
 
 ### Git Submodules
 
