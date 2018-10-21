@@ -297,7 +297,11 @@ public final class AsyncOperation: Operation
 import UIKit
 
 private typealias BackgroundTaskIdentifier = UIBackgroundTaskIdentifier
+#if swift(>=4.2)
+private let BackgroundTaskInvalid = UIBackgroundTaskIdentifier.invalid
+#else
 private let BackgroundTaskInvalid = UIBackgroundTaskInvalid
+#endif
 
 private func beginBackgroundTask(handler: (() -> Swift.Void)? = nil) -> BackgroundTaskIdentifier {
     return UIApplication.shared.beginBackgroundTask(expirationHandler: handler)
