@@ -16,5 +16,5 @@ let package = Package(
             name: "BackgroundableTests",
             dependencies: ["Backgroundable"]),
         ],
-    swiftLanguageVersions: [3, 4]
+    swiftLanguageVersions: [3, 4.1, 4.2]
 )
