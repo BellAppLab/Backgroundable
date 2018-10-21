@@ -1,0 +1,4 @@
+module Backgroundable {
+    header "Backgroundable.h"
+    export *
+}
