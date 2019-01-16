@@ -461,4 +461,23 @@ public final class BackgroundQueue: OperationQueue
             delegate.backgroundQueueDidFinishOperations(self)
         }
     }
+
+    @nonobjc
+    private var suspensionCount: Int = 0
+
+    public override var isSuspended: Bool {
+        get {
+            return mutex.sync { super.isSuspended }
+        }
+        set {
+            mutex.sync {
+                let oldCount = suspensionCount
+                let increment = newValue ? 1 : -1
+                suspensionCount += increment
+                if suspensionCount < 0 { suspensionCount = 0 }
+                guard oldCount != suspensionCount else { return }
+                super.isSuspended = suspensionCount > 0
+            }
+        }
+    }
 }
