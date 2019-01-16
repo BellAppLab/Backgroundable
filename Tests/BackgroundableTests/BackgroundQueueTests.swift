@@ -211,6 +211,104 @@ class BackgroundQueueTests: XCTestCase, BackgroundQueueTest
         wait(for: expectations,
              timeout: 10)
     }
+
+    let testOperationShouldntStartOnSuspendedQueueDescription = "A an operation shoudn't start on a suspended queue"
+    func testOperationShouldntStartOnSuspendedQueue() {
+        var expectations = [XCTestExpectation]()
+
+        let expectation1 = expectation(description: testOperationShouldntStartOnSuspendedQueueDescription)
+        expectation1.isInverted = true
+        expectations.append(expectation1)
+
+        backgroundQueue.isSuspended = true
+        backgroundQueue.addOperation {
+            expectation1.fulfill()
+        }
+
+        wait(for: expectations,
+             timeout: 3)
+
+        backgroundQueue.cancelAllOperations()
+        backgroundQueue.isSuspended = false
+    }
+
+    let testSuspendedQueueShouldUnsuspendDescription = "A suspended queue should be able to become unsuspended"
+    func testSuspendedQueueShouldUnsuspend() {
+        let expectation1 = expectation(description: testOperationShouldntStartOnSuspendedQueueDescription)
+        expectation1.isInverted = true
+
+        backgroundQueue.isSuspended = true
+        backgroundQueue.addOperation {
+            expectation1.fulfill()
+        }
+
+        wait(for: [expectation1],
+             timeout: 3)
+
+        backgroundQueue.cancelAllOperations()
+
+        let expectation2 = expectation(description: testSuspendedQueueShouldUnsuspendDescription)
+        backgroundQueue.addOperation {
+            expectation2.fulfill()
+        }
+
+        backgroundQueue.isSuspended = false
+
+        wait(for: [expectation2],
+             timeout: 2)
+    }
+
+    let testMultipleSuspensionsDescription = "A queue should be able to unsuspend after being suspended several times"
+    func testMultipleSuspensions() {
+        let expectation1 = expectation(description: testOperationShouldntStartOnSuspendedQueueDescription)
+        expectation1.isInverted = true
+
+        backgroundQueue.isSuspended = true
+
+        backgroundQueue.addOperation {
+            expectation1.fulfill()
+        }
+
+        backgroundQueue.isSuspended = true
+        backgroundQueue.isSuspended = true
+
+        backgroundQueue.isSuspended = false
+
+        XCTAssertTrue(backgroundQueue.isSuspended, "The background queue should still be suspended after 3 suspensions and 1 unsuspension")
+
+        wait(for: [expectation1],
+             timeout: 3)
+
+        backgroundQueue.cancelAllOperations()
+
+        let expectation2 = expectation(description: testMultipleSuspensionsDescription)
+        backgroundQueue.addOperation {
+            expectation2.fulfill()
+        }
+
+        backgroundQueue.isSuspended = false
+
+        XCTAssertTrue(backgroundQueue.isSuspended, "The background queue should still be suspended after 3 suspensions and 2 unsuspensions")
+
+        backgroundQueue.isSuspended = false
+
+        XCTAssertFalse(backgroundQueue.isSuspended, "The background queue should not be suspended after 3 suspensions and 3 unsuspensions")
+
+        wait(for: [expectation2],
+             timeout: 2)
+
+        let expectation3 = expectation(description: testMultipleSuspensionsDescription)
+        backgroundQueue.addOperation {
+            expectation3.fulfill()
+        }
+
+        backgroundQueue.isSuspended = false
+
+        wait(for: [expectation3],
+             timeout: 2)
+
+        XCTAssertFalse(backgroundQueue.isSuspended, "The background queue should not be suspended after 3 suspensions and 4 unsuspensions")
+    }
 }
 
 

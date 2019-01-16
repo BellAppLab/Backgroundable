@@ -986,9 +986,9 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = "";
+				SWIFT_VERSION = 4.2;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
-				VERSION = 1.0.2;
+				VERSION = 1.1.0;
 			};
 			name = Debug;
 		};
@@ -1042,10 +1042,10 @@
 				PRODUCT_NAME = Backgroundable;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = "";
+				SWIFT_VERSION = 4.2;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 				VALIDATE_PRODUCT = YES;
-				VERSION = 1.0.2;
+				VERSION = 1.1.0;
 			};
 			name = Release;
 		};
