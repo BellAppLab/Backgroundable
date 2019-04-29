@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name                = "Backgroundable"
-  s.version             = "1.2.0"
+  s.version             = "1.2.1"
   s.summary             = "A collection of handy classes, extensions and global functions to handle being in the background using Swift."
   s.screenshot          = "https://github.com/BellAppLab/Backgroundable/raw/master/Images/backgroundable.png"
 
@@ -23,6 +23,8 @@ It's powerful because it's simple.
   s.ios.deployment_target = "9.0"
   s.osx.deployment_target = "10.10"
   s.tvos.deployment_target = "9.0"
+
+  s.swift_version       = '5.0'
 
   s.module_name         = 'Backgroundable'
 
