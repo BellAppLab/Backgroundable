@@ -29,12 +29,6 @@ private final class PThreadMutex {
         return try work()
     }
     
-    func trySync<R>(execute work: () throws -> R) rethrows -> R? {
-        guard unbalancedTryLock() else { return nil }
-        defer { unbalancedUnlock() }
-        return try work()
-    }
-    
     private var unsafeMutex = pthread_mutex_t()
     
     /// Default constructs as ".Normal" or ".Recursive" on request.
@@ -56,10 +50,6 @@ private final class PThreadMutex {
     
     private func unbalancedLock() {
         pthread_mutex_lock(&unsafeMutex)
-    }
-    
-    private func unbalancedTryLock() -> Bool {
-        return pthread_mutex_trylock(&unsafeMutex) == 0
     }
     
     private func unbalancedUnlock() {
@@ -126,7 +116,7 @@ import Foundation
  ## See Also:
  - `BackgroundQueue`
  */
-@objc
+@objc(BLAsyncOperation)
 public final class AsyncOperation: Operation
 {
     @nonobjc
@@ -357,7 +347,7 @@ public protocol BackgroundQueueDelegate: AnyObject {
  
  - note: These operations are guaranteed to be executed one after the other.
  */
-@objc
+@objc(BLBackgroundQueue)
 public final class BackgroundQueue: OperationQueue
 {
     @nonobjc
