@@ -276,7 +276,11 @@ public final class AsyncOperation: Operation
      */
     @nonobjc
     private func startTimeout() {
+        let description = self.debugDescription
         DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + timeout) { [weak self] in
+            #if DEBUG
+            print("Async Operation did time out: \(description)")
+            #endif
             self?.finish()
         }
     }
