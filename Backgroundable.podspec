@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name                = "Backgroundable"
-  s.version             = "1.2.3"
+  s.version             = "1.3.0"
   s.summary             = "A collection of handy classes, extensions and global functions to handle being in the background using Swift."
   s.screenshot          = "https://github.com/BellAppLab/Backgroundable/raw/master/Images/backgroundable.png"
 
@@ -20,9 +20,9 @@ It's powerful because it's simple.
   s.author              = { "Bell App Lab" => "apps@bellapplab.com" }
   s.social_media_url    = "https://twitter.com/BellAppLab"
 
-  s.ios.deployment_target = "9.0"
-  s.osx.deployment_target = "10.10"
-  s.tvos.deployment_target = "9.0"
+  s.ios.deployment_target = "10.0"
+  s.osx.deployment_target = "10.12"
+  s.tvos.deployment_target = "10.0"
 
   s.swift_version       = '5.0'
 

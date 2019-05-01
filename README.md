@@ -1,4 +1,4 @@
-# Backgroundable [![Version](https://img.shields.io/badge/Version-1.2.3-black.svg?style=flat)](#installation) [![License](https://img.shields.io/cocoapods/l/Backgroundable.svg?style=flat)](#license)
+# Backgroundable [![Version](https://img.shields.io/badge/Version-1.3.0-black.svg?style=flat)](#installation) [![License](https://img.shields.io/cocoapods/l/Backgroundable.svg?style=flat)](#license)
 
 [![Platforms](https://img.shields.io/badge/Platforms-iOS|tvOS|macOS|Linux-brightgreen.svg?style=flat)](#installation)
 [![Swift support](https://img.shields.io/badge/Swift-3.3%20%7C%204.1%20%7C%204.2-red.svg?style=flat)](#swift-versions-support)
@@ -17,9 +17,9 @@ It's powerful because it's simple.
 
 ## Specs
 
-* iOS 9+
-* tvOS 9+
-* macOS 10.11+
+* iOS 10+
+* tvOS 10+
+* macOS 10.12+
 * Swift 4.2+
 * Objective-C ready
 
@@ -173,7 +173,7 @@ AsyncOperation({ (op) in
 ### Cocoapods
 
 ```ruby
-pod 'Backgroundable', '~> 1.2'
+pod 'Backgroundable', '~> 1.3'
 ```
 
 Then `import Backgroundable` where needed.
@@ -181,7 +181,7 @@ Then `import Backgroundable` where needed.
 ### Carthage
 
 ```swift
-github "BellAppLab/Backgroundable" ~> 1.2
+github "BellAppLab/Backgroundable" ~> 1.3
 ```
 
 Then `import Backgroundable` where needed.
@@ -190,7 +190,7 @@ Then `import Backgroundable` where needed.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/BellAppLab/Backgroundable", from: "1.2")
+    .package(url: "https://github.com/BellAppLab/Backgroundable", from: "1.3")
 ]
 ```
 
