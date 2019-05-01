@@ -255,19 +255,23 @@ public final class AsyncOperation: Operation
         As per [Apple's documentation](https://developer.apple.com/documentation/foundation/operation/1408418-iscancelled), it's always a good idea to check if your operation has been cancelled during the execution of its closure and shortcircuit it prematurely if needed.
      */
     @nonobjc
-    public required init(timeout: TimeInterval = 10,
+    public required init(name: String? = nil,
+                         timeout: TimeInterval = 10,
                          _ closure: @escaping (_ operation: AsyncOperation) -> Swift.Void)
     {
         self._closure = closure
         self.timeout = timeout >= 0.0 ? timeout : 10
         super.init()
+        self.name = name
     }
     
     @objc
-    public convenience init(timeout: TimeInterval,
+    public convenience init(name: String?,
+                            timeout: TimeInterval,
                             andBlock closure: @escaping (_ operation: AsyncOperation) -> Swift.Void)
     {
-        self.init(timeout: timeout,
+        self.init(name: name,
+                  timeout: timeout,
                   closure)
     }
     
@@ -283,6 +287,12 @@ public final class AsyncOperation: Operation
             #endif
             self?.finish()
         }
+    }
+
+    public override var debugDescription: String {
+        return """
+        \(String(describing: self)) - Name: \(String(describing: name)) - Timeout: \(timeout) - isExecuting: \(isExecuting) - isFinished: \(isFinished) - isCancelled: \(isCancelled) - isReady: \(isReady)
+        """
     }
 }
 
