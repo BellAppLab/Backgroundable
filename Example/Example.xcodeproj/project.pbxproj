@@ -995,7 +995,7 @@
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
-				VERSION = 1.2.2;
+				VERSION = 1.2.3;
 			};
 			name = Debug;
 		};
@@ -1053,7 +1053,7 @@
 				SWIFT_VERSION = 5.0;
 				TVOS_DEPLOYMENT_TARGET = 9.0;
 				VALIDATE_PRODUCT = YES;
-				VERSION = 1.2.2;
+				VERSION = 1.2.3;
 			};
 			name = Release;
 		};
