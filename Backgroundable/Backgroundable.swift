@@ -274,6 +274,17 @@ public final class AsyncOperation: Operation
                   timeout: timeout,
                   closure)
     }
+
+    deinit {
+        timer = nil
+    }
+
+    @nonobjc
+    private weak var timer: Timer? {
+        didSet {
+            oldValue?.invalidate()
+        }
+    }
     
     /**
      If an operation never calls its `finish()` method, this will cancel it.
@@ -281,11 +292,20 @@ public final class AsyncOperation: Operation
     @nonobjc
     private func startTimeout() {
         let description = self.debugDescription
-        DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + timeout) { [weak self] in
-            #if DEBUG
-            print("Async Operation did time out: \(description)")
-            #endif
-            self?.finish()
+        let timeout = self.timeout
+        DispatchQueue.main.async { [weak self] in
+            self?.timer = Timer.scheduledTimer(withTimeInterval: timeout,
+                                               repeats: false)
+            {
+                guard $0.isValid else { return }
+                guard let self = self else { $0.invalidate(); return }
+                self.timer = nil
+                guard self.isFinished == false else { return }
+                #if DEBUG
+                print("Async Operation did time out: \(description)")
+                #endif
+                self.finish()
+            }
         }
     }
 
