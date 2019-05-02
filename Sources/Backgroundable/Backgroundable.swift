@@ -311,7 +311,7 @@ public final class AsyncOperation: Operation
 
     public override var debugDescription: String {
         return """
-        \(String(describing: self)) - Name: \(String(describing: name)) - Timeout: \(timeout) - isExecuting: \(isExecuting) - isFinished: \(isFinished) - isCancelled: \(isCancelled) - isReady: \(isReady)
+        \(String(describing: self)) - Timeout: \(timeout) - isExecuting: \(isExecuting) - isFinished: \(isFinished) - isCancelled: \(isCancelled) - isReady: \(isReady)
         """
     }
 }
