@@ -211,6 +211,10 @@ public final class AsyncOperation: Operation
     @objc
     public func finish() {
         guard !isFinished else { return }
+        guard isExecuting else {
+            cancel()
+            return
+        }
         isExecuting = false
         isFinished = true
     }
