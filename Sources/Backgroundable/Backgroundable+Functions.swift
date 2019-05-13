@@ -28,7 +28,7 @@ import Foundation
  The easiest way to execute code in the background.
  
  - parameters:
- - closure: The closure to be executed in the background.
+     - closure: The closure to be executed in the background.
  */
 public func inTheBackground(_ closure: @escaping () -> Swift.Void)
 {
@@ -39,7 +39,7 @@ public func inTheBackground(_ closure: @escaping () -> Swift.Void)
  The easiest way to excute code on the main thread.
  
  - parameters:
- - closure: The closure to be executed on the main thread.
+     - closure: The closure to be executed on the main thread.
  */
 public func onTheMainThread(_ closure: @escaping () -> Swift.Void)
 {
@@ -50,7 +50,7 @@ public func onTheMainThread(_ closure: @escaping () -> Swift.Void)
  The easiest way to excute code in the global background queue.
  
  - parameters:
- - closure: The closure to be executed in the global background queue.
+     - closure: The closure to be executed in the global background queue.
  */
 public func inTheGlobalQueue(_ closure: @escaping () -> Swift.Void)
 {

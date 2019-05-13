@@ -51,8 +51,8 @@ public extension OperationQueue
      ```
      
      - parameters:
-     - ops: The array of `Operations` to be enqueued.
-     - waitUntilFinished: See `OperationQueue.addOperations(_:waitUntilFinished:)`
+         - ops: The array of `Operations` to be enqueued.
+         - waitUntilFinished: See `OperationQueue.addOperations(_:waitUntilFinished:)`
      */
     @objc
     func addSequentialOperations(_ ops: [Operation],
@@ -66,5 +66,21 @@ public extension OperationQueue
         
         addOperations(ops,
                       waitUntilFinished: wait)
+    }
+
+    /**
+     Enqueues a new `AsyncOperation` to be executed on this queue.
+
+     - parameters:
+         - name: The name of the operation. Useful for debugging. Defaults to `nil`.
+         - timeout: The time in seconds after which this operation should be marked as finished and removed from the queue. Defaults to 10.
+         - closure: The closure to be executed by the operation. The closure takes a `AsyncOperation` parameter. Call `finish()` on the object passed here.
+     */
+    @nonobjc
+    func addAsyncOperation(name: String? = nil,
+                           timeout: TimeInterval = 10,
+                           _ closure: @escaping (_ operation: AsyncOperation) -> Swift.Void)
+    {
+        addOperation(AsyncOperation(name: name, timeout: timeout, closure))
     }
 }

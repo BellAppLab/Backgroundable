@@ -252,6 +252,7 @@ public final class AsyncOperation: Operation
      Designated initialiser for a new `AsyncOperation`.
      
      - parameters:
+        - name: The name of the operation. Useful for debugging. Defaults to `nil`.
         - timeout: The time in seconds after which this operation should be marked as finished and removed from the queue. Defaults to 10.
         - closure: The closure to be executed by the operation. The closure takes a `AsyncOperation` parameter. Call `finish()` on the object passed here.
      
@@ -373,7 +374,7 @@ public protocol BackgroundQueueDelegate: AnyObject {
      Called when the `BackgroundQueue` has become empty.
      
      - parameters:
-     - queue: The underlying `BackgroundQueue` whose operations have finished.
+         - queue: The underlying `BackgroundQueue` whose operations have finished.
      
      - warning: This method is called in `DispatchQueue.global()`.
      */
