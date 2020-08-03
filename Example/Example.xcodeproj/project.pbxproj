@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		650BF6DC24D70B80001C531A /* Backgroundable+Operation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650BF6DB24D70B80001C531A /* Backgroundable+Operation.swift */; };
+		650BF6DD24D70B80001C531A /* Backgroundable+Operation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650BF6DB24D70B80001C531A /* Backgroundable+Operation.swift */; };
+		650BF6DE24D70B80001C531A /* Backgroundable+Operation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650BF6DB24D70B80001C531A /* Backgroundable+Operation.swift */; };
+		650BF6E024D7D8E4001C531A /* UniquenessPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650BF6DF24D7D8E4001C531A /* UniquenessPolicyTests.swift */; };
+		650BF6E124D7D8E4001C531A /* UniquenessPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650BF6DF24D7D8E4001C531A /* UniquenessPolicyTests.swift */; };
+		650BF6E224D7D8E4001C531A /* UniquenessPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 650BF6DF24D7D8E4001C531A /* UniquenessPolicyTests.swift */; };
 		6553C35E20D944D800405D40 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6553C35D20D944D800405D40 /* AppDelegate.swift */; };
 		6553C36020D944D900405D40 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6553C35F20D944D900405D40 /* Assets.xcassets */; };
 		6553C36320D944D900405D40 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 6553C36120D944D900405D40 /* MainMenu.xib */; };
@@ -134,6 +140,8 @@
 
 /* Begin PBXFileReference section */
 		650B58BC1DA6B8380037CBD7 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; name = README.md; path = ../README.md; sourceTree = "<group>"; };
+		650BF6DB24D70B80001C531A /* Backgroundable+Operation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Backgroundable+Operation.swift"; sourceTree = "<group>"; };
+		650BF6DF24D7D8E4001C531A /* UniquenessPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniquenessPolicyTests.swift; sourceTree = "<group>"; };
 		6553C34D20D922DF00405D40 /* Backgroundable+Functions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Backgroundable+Functions.swift"; sourceTree = "<group>"; };
 		6553C35220D9233800405D40 /* Backgroundable+OperationQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Backgroundable+OperationQueue.swift"; sourceTree = "<group>"; };
 		6553C35B20D944D800405D40 /* macOS Example.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "macOS Example.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -379,6 +387,7 @@
 				6582320C20D8015E00FA8CC9 /* GlobalFunctionsTests.swift */,
 				6582320D20D8015E00FA8CC9 /* AsyncOperationTests.swift */,
 				6582320E20D8015E00FA8CC9 /* BackgroundQueueTests.swift */,
+				650BF6DF24D7D8E4001C531A /* UniquenessPolicyTests.swift */,
 				6582320F20D8015E00FA8CC9 /* Tests+Aux.swift */,
 			);
 			path = BackgroundableTests;
@@ -398,6 +407,7 @@
 			children = (
 				6582321820D8017200FA8CC9 /* Backgroundable.swift */,
 				6553C35220D9233800405D40 /* Backgroundable+OperationQueue.swift */,
+				650BF6DB24D70B80001C531A /* Backgroundable+Operation.swift */,
 				6553C34D20D922DF00405D40 /* Backgroundable+Functions.swift */,
 			);
 			path = Backgroundable;
@@ -786,6 +796,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				650BF6E224D7D8E4001C531A /* UniquenessPolicyTests.swift in Sources */,
 				6553C39520D9481A00405D40 /* AsyncOperationTests.swift in Sources */,
 				6553C39620D9481A00405D40 /* BackgroundQueueTests.swift in Sources */,
 				6553C39720D9481A00405D40 /* Tests+Aux.swift in Sources */,
@@ -798,6 +809,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6553C39120D9473800405D40 /* Backgroundable.swift in Sources */,
+				650BF6DE24D70B80001C531A /* Backgroundable+Operation.swift in Sources */,
 				6553C39220D9473800405D40 /* Backgroundable+OperationQueue.swift in Sources */,
 				6553C39320D9473800405D40 /* Backgroundable+Functions.swift in Sources */,
 			);
@@ -808,6 +820,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6553C3AA20D948B900405D40 /* Backgroundable.swift in Sources */,
+				650BF6DD24D70B80001C531A /* Backgroundable+Operation.swift in Sources */,
 				6553C3AB20D948B900405D40 /* Backgroundable+OperationQueue.swift in Sources */,
 				6553C3AC20D948B900405D40 /* Backgroundable+Functions.swift in Sources */,
 			);
@@ -818,6 +831,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				6553C3BE20D94A2B00405D40 /* Backgroundable.swift in Sources */,
+				650BF6DC24D70B80001C531A /* Backgroundable+Operation.swift in Sources */,
 				6553C3BF20D94A2B00405D40 /* Backgroundable+OperationQueue.swift in Sources */,
 				6553C3C020D94A2B00405D40 /* Backgroundable+Functions.swift in Sources */,
 			);
@@ -845,6 +859,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				650BF6E024D7D8E4001C531A /* UniquenessPolicyTests.swift in Sources */,
 				6582325720D812CF00FA8CC9 /* AsyncOperationTests.swift in Sources */,
 				6582325820D812CF00FA8CC9 /* BackgroundQueueTests.swift in Sources */,
 				6582325920D812CF00FA8CC9 /* Tests+Aux.swift in Sources */,
@@ -856,6 +871,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				650BF6E124D7D8E4001C531A /* UniquenessPolicyTests.swift in Sources */,
 				6582326920D8136E00FA8CC9 /* AsyncOperationTests.swift in Sources */,
 				6582326A20D8136E00FA8CC9 /* BackgroundQueueTests.swift in Sources */,
 				6582326B20D8136E00FA8CC9 /* Tests+Aux.swift in Sources */,
@@ -971,6 +987,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../Carthage/build/$(PLATFORM)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -993,9 +1010,9 @@
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
-				SWIFT_VERSION = 5.1;
+				SWIFT_VERSION = 5.3;
 				TVOS_DEPLOYMENT_TARGET = 10.0;
-				VERSION = 1.3.4;
+				VERSION = 1.4.0;
 			};
 			name = Debug;
 		};
@@ -1036,6 +1053,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				FRAMEWORK_SEARCH_PATHS = "$(SRCROOT)/../Carthage/build/$(PLATFORM)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -1050,10 +1068,10 @@
 				PRODUCT_NAME = Backgroundable;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
-				SWIFT_VERSION = 5.1;
+				SWIFT_VERSION = 5.3;
 				TVOS_DEPLOYMENT_TARGET = 10.0;
 				VALIDATE_PRODUCT = YES;
-				VERSION = 1.3.4;
+				VERSION = 1.4.0;
 			};
 			name = Release;
 		};

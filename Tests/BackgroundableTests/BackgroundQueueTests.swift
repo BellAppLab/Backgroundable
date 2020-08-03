@@ -91,8 +91,8 @@ class BackgroundQueueTests: XCTestCase, BackgroundQueueTest
         })
         expectations.append(expectation(description: testSequentialOperationsToTheMainOperationQueueDescription))
         
-        OperationQueue.main.addSequentialOperations(sequentialOperations,
-                                                    waitUntilFinished: false)
+        OperationQueue.background.addSequentialOperations(sequentialOperations,
+                                                          waitUntilFinished: false)
         
         wait(for: expectations,
              timeout: 20)
@@ -309,6 +309,18 @@ class BackgroundQueueTests: XCTestCase, BackgroundQueueTest
 
         XCTAssertFalse(backgroundQueue.isSuspended, "The background queue should not be suspended after 3 suspensions and 4 unsuspensions")
     }
+
+    let testOperationShouldBeAddedDescription = "A background queue should be able to receive operations"
+    func testOperationShouldBeAdded() {
+        let expectation1 = expectation(description: testOperationShouldBeAddedDescription)
+
+        backgroundQueue.addOperation {
+            expectation1.fulfill()
+        }
+
+        wait(for: [expectation1],
+             timeout: 3)
+    }
 }
 
 
@@ -340,7 +352,8 @@ extension BackgroundQueueTests
         return [
             ("testSequentialOperationsOnTheMainOperationQueue", testSequentialOperationsOnTheMainOperationQueue),
             ("testSequentialOperationsInTheBackground", testSequentialOperationsInTheBackground),
-            ("testSequentialOperationShouldntStartBeforeDependencyHasFinished", testSequentialOperationShouldntStartBeforeDependencyHasFinished)
+            ("testSequentialOperationShouldntStartBeforeDependencyHasFinished", testSequentialOperationShouldntStartBeforeDependencyHasFinished),
+            ("testOperationShouldBeAdded", testOperationShouldBeAdded)
         ]
     }
 }

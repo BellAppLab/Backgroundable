@@ -380,6 +380,150 @@ extension AsyncOperationMultipleCancellationTest
 }
 
 
+class AsyncOperationTimeoutTests: XCTestCase, BackgroundQueueTest
+{
+    let backgroundQueue: BackgroundQueue = BackgroundQueue()
+    var expectations: [XCTestExpectation] = []
+
+    override func setUp() {
+        super.setUp()
+
+        setUpBackgroundQueue()
+        expectations = []
+    }
+
+    let testNonFinalisedOperationShouldTimeoutDescription = "Testing non-finalised operations should timeout"
+    func testNonFinalisedOperationShouldTimeout() {
+        expectations.append(expectation(description: testNonFinalisedOperationShouldTimeoutDescription + " _final"))
+        expectations.last!.isInverted = true
+
+        let executionDescription = testNonFinalisedOperationShouldTimeoutDescription + " _executed"
+        expectations.append(expectation(description: executionDescription))
+
+        expectations.append(expectation(description: testNonFinalisedOperationShouldTimeoutDescription + " _first"))
+
+        let startDate = Date()
+        let dateDescription = testNonFinalisedOperationShouldTimeoutDescription + " _date"
+        expectations.append(expectation(description: dateDescription))
+
+        //A timeout AsyncOperation
+        let op = AsyncOperation(timeout: 3) { [weak self] (op) in
+            print("Executing Operation")
+
+            self?.expectations.first(where: { $0.expectationDescription == executionDescription })?.fulfill()
+        }
+        op.completionBlock = { [weak self] in
+            XCTAssertTrue(startDate.timeIntervalSinceNow > -5, "We shouldn't have waited 5 seconds to execute this")
+            self?.expectations.first(where: { $0.expectationDescription == dateDescription })?.fulfill()
+        }
+        backgroundQueue.addOperation(op)
+
+        wait(for: expectations,
+             timeout: 5)
+    }
+
+    let testNonFinalisedOperationShouldTimeoutOnTimeDescription = "Testing non-finalised operations should timeout on time"
+    func testNonFinalisedOperationShouldTimeoutOnTime() {
+        let executionDescription = testNonFinalisedOperationShouldTimeoutDescription + " _executed"
+        expectations.append(expectation(description: executionDescription))
+
+        let dateDescription = testNonFinalisedOperationShouldTimeoutOnTimeDescription + " _date"
+        expectations.append(expectation(description: dateDescription))
+        expectations.last!.isInverted = true
+
+        //A timeout AsyncOperation
+        let op = AsyncOperation(timeout: 7) { [weak self] (op) in
+            print("Executing Operation")
+
+            self?.expectations.first(where: { $0.expectationDescription == executionDescription })?.fulfill()
+        }
+        op.completionBlock = { [weak self] in
+            self?.expectations.first(where: { $0.expectationDescription == dateDescription })?.fulfill()
+        }
+        backgroundQueue.addOperation(op)
+
+        wait(for: expectations,
+             timeout: 5)
+    }
+
+    let testTimedOutOperationExecutesTimeoutCallbackDescription = "Testing timed out operation executes the timeout callback"
+    func testTimedOutOperationExecutesTimeoutCallback() {
+        expectations.append(expectation(description: testTimedOutOperationExecutesTimeoutCallbackDescription + " _final"))
+        expectations.last!.isInverted = true
+
+        let executionDescription = testTimedOutOperationExecutesTimeoutCallbackDescription + " _executed"
+        expectations.append(expectation(description: executionDescription))
+
+        let callbackExecutionDescription = testTimedOutOperationExecutesTimeoutCallbackDescription + " _callback_executed"
+        expectations.append(expectation(description: callbackExecutionDescription))
+
+        expectations.append(expectation(description: testTimedOutOperationExecutesTimeoutCallbackDescription + " _first"))
+
+        let startDate = Date()
+        let dateDescription = testTimedOutOperationExecutesTimeoutCallbackDescription + " _date"
+        expectations.append(expectation(description: dateDescription))
+
+        //A timeout AsyncOperation
+        let op = AsyncOperation(timeout: 3, onTimeoutCallback: { [weak self] (op) in
+            XCTAssertTrue(startDate.timeIntervalSinceNow > -5, "We shouldn't have waited 5 seconds to execute this")
+            self?.expectations.first(where: { $0.expectationDescription == dateDescription })?.fulfill()
+            self?.expectations.first(where: { $0.expectationDescription == callbackExecutionDescription })?.fulfill()
+        }) { [weak self] (op) in
+            print("Executing Operation")
+
+            self?.expectations.first(where: { $0.expectationDescription == executionDescription })?.fulfill()
+        }
+        backgroundQueue.addOperation(op)
+
+        wait(for: expectations,
+             timeout: 5)
+    }
+}
+
+extension AsyncOperationTimeoutTests
+{
+    func backgroundQueueWillStartOperations(_ queue: BackgroundQueue) {
+        //Noop
+    }
+
+    func backgroundQueueDidFinishOperations(_ queue: BackgroundQueue)
+    {
+        guard queue == backgroundQueue else { return }
+
+        if let expectation = expectations.first(where: { $0.expectationDescription == testNonFinalisedOperationShouldTimeoutDescription + " _first" }) {
+            expectation.fulfill()
+            return
+        }
+
+        if let expectation = expectations.first(where: { $0.expectationDescription == testNonFinalisedOperationShouldTimeoutDescription + " _final" }) {
+            expectation.fulfill()
+            return
+        }
+
+        if let expectation = expectations.first(where: { $0.expectationDescription == testTimedOutOperationExecutesTimeoutCallbackDescription + " _first" }) {
+            expectation.fulfill()
+            return
+        }
+
+        if let expectation = expectations.first(where: { $0.expectationDescription == testTimedOutOperationExecutesTimeoutCallbackDescription + " _final" }) {
+            expectation.fulfill()
+            return
+        }
+    }
+}
+
+extension AsyncOperationTimeoutTests
+{
+    static var allTests : [(String, (AsyncOperationTimeoutTests) -> () throws -> Swift.Void)] {
+        return [
+            ("testNonFinalisedOperationShouldTimeout", testNonFinalisedOperationShouldTimeout),
+            ("testNonFinalisedOperationShouldTimeoutOnTime", testNonFinalisedOperationShouldTimeoutOnTime),
+            ("testTimedOutOperationExecutesTimeoutCallback", testTimedOutOperationExecutesTimeoutCallback)
+        ]
+    }
+}
+
+
 class AsyncOperationCancellationTimeoutTest: XCTestCase, BackgroundQueueTest
 {
     let backgroundQueue: BackgroundQueue = BackgroundQueue()

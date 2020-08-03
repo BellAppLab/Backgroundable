@@ -84,6 +84,45 @@ import Foundation
 
 //MARK: - Operations
 /**
+ The uniqueness policy dictates whether operations with the same `name` should co-exist in a `BackgroundQueue`. This property is set on new `AsyncOperation`s only.
+
+ When adding an `AsyncOperation` to a `BackgroundQueue`, the queue decides which action to take based on the following criteria:
+ * If the **new operation** has the `.replace` policy, any existing operations with the same `name` will be dropped from the queue.
+ * If the **new operation** has the `.drop` policy, it itself will be dropped if another operation with the same name exists in the queue.
+ * Only the **new operation**'s flag is evaluated when adding an operation to the queue.
+ * Only operations that have **not** finished will be evaluated.
+ * Only operations that have **not** been canceled will be evaluated.
+ * **New operations** that are already executing will not be evaluated.
+ * Existing operations that are dropped receive a `cancel()` call.
+ * The `.ignore` flag opts out of the uniqueness constraints and lets the **new operation** behave like a regular `Operation` when added to a queue. This is the default behaviour.
+ * Both operations need to have a `name` set. If either operations have a `nil` name, `.ignore` is assumed.
+ * If multiple operations with the same `name` are being added at the same time, `.ignore` is assumed.
+
+ - note: This functionality will **only** work on `BackgroundQueue`.
+ */
+@objc
+public enum AsyncOperationUniquenessPolicy: Int {
+    /**
+     Operations with this policy opt out of the uniqueness constraints. This is equivalent to not setting a uniqueness policy, or to adding a regular `Operation` to a queue. This is the default behaviour.
+     */
+    case ignore
+    /**
+     `AsyncOperation`s with this policy will replace any existing operations already in the queue.
+     */
+    case replace
+    /**
+     `AsyncOperation`s with this policy will be dropped if another opertion with the same `name` already exists in the queue.
+     */
+    case drop
+
+    /// The default `AsyncOperationUniquenessPolicy`. It is set to `.ignore`.
+    public static let `default`: AsyncOperationUniquenessPolicy = .ignore
+}
+
+public typealias AsyncOperationClosure = (_ operation: AsyncOperation) -> Swift.Void
+
+
+/**
  An `AsyncOperation` is an easy way to perform asynchronous tasks in an `OperationQueue`. It's designed to make it easy to perform long-running tasks on an operation queue regardless of how many times its task needs to jump between threads. Only once everything is done, the `AsyncOperation` is removed from the queue. 
  
  ## Example
@@ -228,14 +267,12 @@ public final class AsyncOperation: Operation
         }
     }
     
-    private typealias AsyncOperationWork = (_ operation: AsyncOperation) -> Swift.Void
-    
     /// The closure to be executed by the operation.
     @nonobjc
-    private var _closure: AsyncOperationWork?
+    private var _closure: AsyncOperationClosure?
     
     @nonobjc
-    private var closure: AsyncOperationWork? {
+    private var closure: AsyncOperationClosure? {
         get {
             return mutex.sync { _closure }
         }
@@ -245,8 +282,26 @@ public final class AsyncOperation: Operation
     }
     
     /// The timeout interval before the operation is removed from the queue. Defaults to 10.
+    let timeout: TimeInterval
+
+    /**
+     Callback to be executed when this operation times out.
+
+     - parameters:
+        - operation: The `AsyncOperation` that has timed out.
+
+     - note: The callback is executed on `OperationQueue.background`.
+     */
     @nonobjc
-    private let timeout: TimeInterval
+    fileprivate let onTimeoutCallback: AsyncOperationClosure?
+
+    /**
+     The uniqueness policy to be applied when adding this operation to a queue.
+
+     ## See Also:
+     - `AsyncOperationUniquenessPolicy`
+     */
+    let uniquenessPolicy: AsyncOperationUniquenessPolicy
     
     /**
      Designated initialiser for a new `AsyncOperation`.
@@ -254,30 +309,29 @@ public final class AsyncOperation: Operation
      - parameters:
         - name: The name of the operation. Useful for debugging. Defaults to `nil`.
         - timeout: The time in seconds after which this operation should be marked as finished and removed from the queue. Defaults to 10.
+        - onTimeoutCallback: The callback to be executed when this operation times out. The callback is executed on `OperationQueue.background`.
+        - uniquenessPolicy: The uniqueness policy to be applied to this operation when adding it to a `BackgroundQueue`.
         - closure: The closure to be executed by the operation. The closure takes a `AsyncOperation` parameter. Call `finish()` on the object passed here.
      
      - note:
         As per [Apple's documentation](https://developer.apple.com/documentation/foundation/operation/1408418-iscancelled), it's always a good idea to check if your operation has been cancelled during the execution of its closure and shortcircuit it prematurely if needed.
+
+     ## See Also:
+     - `AsyncOperationUniquenessPolicy`
      */
-    @nonobjc
+    @objc(withName:timeout:onTimeoutBlock:uniquenessPolicys:andBlock:)
     public required init(name: String? = nil,
                          timeout: TimeInterval = 10,
-                         _ closure: @escaping (_ operation: AsyncOperation) -> Swift.Void)
+                         onTimeoutCallback: AsyncOperationClosure? = nil,
+                         uniquenessPolicy: AsyncOperationUniquenessPolicy = .default,
+                         _ closure: @escaping AsyncOperationClosure)
     {
         self._closure = closure
-        self.timeout = timeout >= 0.0 ? timeout : 10
+        self.timeout = timeout
+        self.onTimeoutCallback = onTimeoutCallback
+        self.uniquenessPolicy = uniquenessPolicy
         super.init()
         self.name = name
-    }
-    
-    @objc
-    public convenience init(name: String?,
-                            timeout: TimeInterval,
-                            andBlock closure: @escaping (_ operation: AsyncOperation) -> Swift.Void)
-    {
-        self.init(name: name,
-                  timeout: timeout,
-                  closure)
     }
 
     deinit {
@@ -310,13 +364,19 @@ public final class AsyncOperation: Operation
                 print("Async Operation did time out: \(description)")
                 #endif
                 self.finish()
+                if let callback = self.onTimeoutCallback {
+                    let strongSelf = self
+                    OperationQueue.background.addOperation {
+                        callback(strongSelf)
+                    }
+                }
             }
         }
     }
 
     public override var debugDescription: String {
         return """
-        \(String(describing: self)) - Timeout: \(timeout) - isExecuting: \(isExecuting) - isFinished: \(isFinished) - isCancelled: \(isCancelled) - isReady: \(isReady)
+        \(String(describing: self)) - Timeout: \(timeout) - Uniqueness Policy: \(uniquenessPolicy) - isExecuting: \(isExecuting) - isFinished: \(isFinished) - isCancelled: \(isCancelled) - isReady: \(isReady)
         """
     }
 }
@@ -353,7 +413,7 @@ private func finishBackgroundTask(identifier: BackgroundTaskIdentifier) {
 #endif
 
 
-//MARK: Operation Queue
+//MARK: - Operation Queue
 private var backgroundQueueContext = 0
 
 /**
@@ -365,7 +425,7 @@ public protocol BackgroundQueueDelegate: AnyObject {
      Called when the `BackgroundQueue` will start executing operations.
      
      - parameters:
-     - queue: The underlying `BackgroundQueue` who's about to start processing operations.
+        - queue: The underlying `BackgroundQueue` who's about to start processing operations.
      
      - warning: This method is called in `DispatchQueue.global()`.
      */
@@ -451,6 +511,35 @@ public final class BackgroundQueue: OperationQueue
                              context: &backgroundQueueContext)
         }
     }
+
+    public override func addOperation(_ op: Operation) {
+        addOperations([op],
+                      waitUntilFinished: false)
+    }
+
+    public override func addOperations(_ ops: [Operation],
+                                       waitUntilFinished wait: Bool)
+    {
+        ops
+            .forEach { newOp in
+                operations(name: newOp.name)
+                    .compactMap { newOp.operationToCancel($0) }
+                    .forEach {
+                        guard $0.isCancelled == false else { return }
+                        $0.cancel()
+                    }
+            }
+
+        let opsToAdd = ops
+            .compactMap { newOp -> Operation? in
+                let existingOps = operations(name: newOp.name)
+                guard existingOps.isEmpty == false else { return newOp }
+                return existingOps.compactMap { newOp.operationToAdd($0) }.first
+            }
+
+        super.addOperations(opsToAdd,
+                            waitUntilFinished: wait)
+    }
     
     public override func observeValue(forKeyPath keyPath: String?,
                                       of object: Any?,
@@ -508,5 +597,13 @@ public final class BackgroundQueue: OperationQueue
                 super.isSuspended = suspensionCount > 0
             }
         }
+    }
+}
+
+private extension BackgroundQueue
+{
+    func operations(name: String?) -> [Operation] {
+        guard let name = name else { return operations }
+        return operations.filter { $0.name == name }
     }
 }
