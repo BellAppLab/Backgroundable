@@ -76,11 +76,17 @@ public extension OperationQueue
          - timeout: The time in seconds after which this operation should be marked as finished and removed from the queue. Defaults to 10.
          - closure: The closure to be executed by the operation. The closure takes a `AsyncOperation` parameter. Call `finish()` on the object passed here.
      */
-    @nonobjc
+    @objc(addAsyncOperationWithName:timeout:onTimeoutBlock:uniquenessPolicy:andBlock:)
     func addAsyncOperation(name: String? = nil,
                            timeout: TimeInterval = 10,
-                           _ closure: @escaping (_ operation: AsyncOperation) -> Swift.Void)
+                           onTimeoutCallback: AsyncOperationClosure? = nil,
+                           uniquenessPolicy: AsyncOperationUniquenessPolicy = .default,
+                           _ closure: @escaping AsyncOperationClosure)
     {
-        addOperation(AsyncOperation(name: name, timeout: timeout, closure))
+        addOperation(AsyncOperation(name: name,
+                                    timeout: timeout,
+                                    onTimeoutCallback: onTimeoutCallback,
+                                    uniquenessPolicy: uniquenessPolicy,
+                                    closure))
     }
 }

@@ -1,7 +1,7 @@
-# Backgroundable [![Version](https://img.shields.io/badge/Version-1.3.4-black.svg?style=flat)](#installation) [![License](https://img.shields.io/cocoapods/l/Backgroundable.svg?style=flat)](#license)
+# Backgroundable [![Version](https://img.shields.io/badge/Version-1.4.0-black.svg?style=flat)](#installation) [![License](https://img.shields.io/cocoapods/l/Backgroundable.svg?style=flat)](#license)
 
 [![Platforms](https://img.shields.io/badge/Platforms-iOS|tvOS|macOS|Linux-brightgreen.svg?style=flat)](#installation)
-[![Swift support](https://img.shields.io/badge/Swift-3.3%20%7C%204.1%20%7C%204.2-red.svg?style=flat)](#swift-versions-support)
+[![Swift support](https://img.shields.io/badge/Swift-4.2%20%7C%205.3-red.svg?style=flat)](#swift-versions-support)
 [![CocoaPods Compatible](https://img.shields.io/cocoapods/v/Backgroundable.svg?style=flat&label=CocoaPods)](https://cocoapods.org/pods/Backgroundable)
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
 [![Swift Package Manager compatible](https://img.shields.io/badge/SPM-compatible-orange.svg?style=flat)](https://github.com/apple/swift-package-manager)
@@ -154,6 +154,8 @@ AsyncOperation(timeout: 20, { (op) in
 })
 ```
 
+Optionally, you can set the `onTimeoutCallback:` when instantiating a new `AsyncOperation` to be notified when your operations times out.
+
 ### Cancelations
 
 As per [Apple's documentation](https://developer.apple.com/documentation/foundation/operation/1408418-iscancelled), it's always a good idea to check if your operation has been cancelled during the execution of its closure and shortcircuit it prematurely if needed. For example:
@@ -168,12 +170,30 @@ AsyncOperation({ (op) in
 })
 ```
 
+### Uniqueness Policy
+
+The uniqueness policy dictates whether `AsyncOperation`s with the same `name` should co-exist in a `BackgroundQueue`. This is great for deduplicating operations, for example:
+
+```swift
+@IBAction func refresh(_ sender: UIRefreshControl) {
+    let op = AsyncOperation(name: "Call to API endpoint /xyz", uniquenessPolicy: .drop) { op in
+        //make the call to the API
+        op.finish()
+    }
+    OperationQueue.background.addOperation(op)
+}
+```
+
+This first time the user activates the refresh control, the operation will be added to the queue as normal, because there are no other operations with the name `"Call to API endpoint /xyz"` there yet. But if the user activates the control again before the first call to the API returns, then the `.drop` policy will make sure that a second operation is not added to the queue, since there's one operation with that name in there already. If `.replace` is set, then the previous operation is cancelled and the new one replaces it. 
+
+Neat! 
+
 ## Installation
 
 ### Cocoapods
 
 ```ruby
-pod 'Backgroundable', '~> 1.3'
+pod 'Backgroundable', '~> 1.4'
 ```
 
 Then `import Backgroundable` where needed.
@@ -181,7 +201,7 @@ Then `import Backgroundable` where needed.
 ### Carthage
 
 ```swift
-github "BellAppLab/Backgroundable" ~> 1.3
+github "BellAppLab/Backgroundable" ~> 1.4
 ```
 
 Then `import Backgroundable` where needed.
@@ -190,7 +210,7 @@ Then `import Backgroundable` where needed.
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/BellAppLab/Backgroundable", from: "1.3")
+    .package(url: "https://github.com/BellAppLab/Backgroundable", from: "1.4")
 ]
 ```
 
