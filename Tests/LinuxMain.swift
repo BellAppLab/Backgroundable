@@ -7,5 +7,6 @@ XCTMain([
     testCase(AsyncOperationCancellationTest.allTests),
     testCase(AsyncOperationMultipleCancellationTest.allTests),
     testCase(AsyncOperationCancellationTimeoutTest.allTests),
-    testCase(BackgroundQueueTests.allTests)
+    testCase(BackgroundQueueTests.allTests),
+    testCase(UniquenessPolicyTests.allTests)
 ])
