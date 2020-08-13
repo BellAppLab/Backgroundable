@@ -119,6 +119,17 @@ public enum AsyncOperationUniquenessPolicy: Int {
     public static let `default`: AsyncOperationUniquenessPolicy = .ignore
 }
 
+extension AsyncOperationUniquenessPolicy: CustomStringConvertible
+{
+    public var description: String {
+        switch self {
+        case .ignore: return "AsyncOperationUniquenessPolicy.ignore"
+        case .replace: return "AsyncOperationUniquenessPolicy.replace"
+        case .drop: return "AsyncOperationUniquenessPolicy.drop"
+        }
+    }
+}
+
 public typealias AsyncOperationClosure = (_ operation: AsyncOperation) -> Swift.Void
 
 
@@ -376,7 +387,7 @@ public final class AsyncOperation: Operation
 
     public override var debugDescription: String {
         return """
-        \(String(describing: self)) - Timeout: \(timeout) - Uniqueness Policy: \(uniquenessPolicy) - isExecuting: \(isExecuting) - isFinished: \(isFinished) - isCancelled: \(isCancelled) - isReady: \(isReady)
+        \(String(describing: self)) - name: \(name ?? "NO NAME") - Timeout: \(timeout) - Uniqueness Policy: \(uniquenessPolicy) - isExecuting: \(isExecuting) - isFinished: \(isFinished) - isCancelled: \(isCancelled) - isReady: \(isReady)
         """
     }
 }
