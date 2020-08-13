@@ -1,4 +1,4 @@
-# Backgroundable [![Version](https://img.shields.io/badge/Version-1.4.0-black.svg?style=flat)](#installation) [![License](https://img.shields.io/cocoapods/l/Backgroundable.svg?style=flat)](#license)
+# Backgroundable [![Version](https://img.shields.io/badge/Version-1.4.1-black.svg?style=flat)](#installation) [![License](https://img.shields.io/cocoapods/l/Backgroundable.svg?style=flat)](#license)
 
 [![Platforms](https://img.shields.io/badge/Platforms-iOS|tvOS|macOS|Linux-brightgreen.svg?style=flat)](#installation)
 [![Swift support](https://img.shields.io/badge/Swift-4.2%20%7C%205.3-red.svg?style=flat)](#swift-versions-support)
